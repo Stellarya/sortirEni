@@ -2,25 +2,51 @@
 
 namespace App\Form;
 
+use App\Entity\Lieu;
+use App\Entity\Site;
+use App\Entity\Sortie;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 
 class SortieType extends AbstractType
 {
+    public $token;
+
+    public function __construct(TokenStorageInterface $token)
+    {
+        $this->token = $token;
+    }
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        //$token = $this->token->getToken()->getUser()->getUsername();
         $builder
-            ->add('nom')
-            ->add('date_heure_debut')
+            ->add('nom',
+                TextType::class,
+                [
+                    'label' => 'Nom de la sortie '
+                ])
+            ->add('dateHeureDebut',
+                DateTimeType::class,
+                [
+                    'label' => 'Date et heure de la sortie '
+                ])
+            ->add('dateLimiteInscription',
+                DateType::class,
+                [
+                    'label' => 'Date limite d\'inscription '
+                ])
             ->add('duree')
-            ->add('date_limite_inscription')
-            ->add('nb_inscription_max')
-            ->add('informations',
+            ->add('nbInscriptionMax')
+            ->add('infosSortie',
                 TextareaType::class,
                 [
                     'label' => 'Informations sur la sortie',
@@ -31,22 +57,34 @@ class SortieType extends AbstractType
             ->add('lieu',
                 EntityType::class,
                 [
-                    'class' => Site::class,
-                    'choice_label' => 'name'
+                    'class' => Lieu::class,
+                    'choice_label' => 'nom'
                 ])
             ->add(
-                'submit',
+                'enregistrer',
                 SubmitType::class,
                 [
+                    'label' => 'Enregistrer',
                     'attr' => [
                         'class' => 'button',
                     ],
                 ]
             )
             ->add(
-                'submit',
+                'publier',
                 SubmitType::class,
                 [
+                    'label' => 'Publier la sortie',
+                    'attr' => [
+                        'class' => 'button',
+                    ],
+                ]
+            )
+            ->add(
+                'Annuler',
+                SubmitType::class,
+                [
+                    'label' => 'Annuler',
                     'attr' => [
                         'class' => 'button',
                     ],
