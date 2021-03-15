@@ -80,16 +80,6 @@ class SortieType extends AbstractType
                     ],
                 ]
             )
-            ->add(
-                'Annuler',
-                SubmitType::class,
-                [
-                    'label' => 'Annuler',
-                    'attr' => [
-                        'class' => 'button',
-                    ],
-                ]
-            )
         ;
     }
 
