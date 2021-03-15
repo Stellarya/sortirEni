@@ -1,0 +1,24 @@
+:root {
+    --primary-color: #1D3557;
+    --secondary-color: #457b9d;
+    --contrast-color: #E63946;
+    --light-blue-color: #A8DADC;
+    --white-color: #F1FAEE;
+}
+
+body {
+    background-color: var(--white-color) !important;
+}
+
+/* NAVIGATION -------------------------------------------------------------------------------------------------------*/
+.navbar-light .navbar-nav .nav-item a.nav-link, #navbarSupportedContent .navbar-nav.user_nav span.nav-link{
+    color: var(--primary-color);
+}
+
+.navbar-light .navbar-nav .nav-item.active a, .navbar-light .navbar-nav .nav-item a:hover{
+    color: var(--contrast-color);
+}
+
+.navbar-collapse .navbar-nav {
+    padding-top: 15px;
+}
