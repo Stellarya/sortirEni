@@ -43,4 +43,17 @@ class SortieController extends AbstractController
 
         return $this->render('sortie/formulaire.html.twig', ["sortieForm" => $sortieForm->createView()]);
     }
+
+    /**
+     * @Route("/sortie/{id}", name="page_detail_sortie", requirements={"id": "\d+"})
+     * @param SortieRepository $sortieRepository
+     * @param int|null $id
+     * @return Response
+     */
+    public function detailSortie(SortieRepository $sortieRepository, int $id = null) : Response
+    {
+        $sortie = $sortieRepository->findOneBy(["id" => $id]);
+
+        return $this->render('sortie/detail.html.twig', ["sortie" => $sortie]);
+    }
 }
