@@ -12,7 +12,7 @@
                 <a class="nav-link" href="{{ path('accueil_index')}}"><i class="fas fa-house-user mr-2"></i>Accueil</a>
             </li>
             <li class="nav-item mr-3">
-                <a class="nav-link" href="#"><i class="fas fa-map-marker-alt mr-2"></i>Sorties</a>
+                <a class="nav-link" href="{{ path('page_sortie') }}"><i class="fas fa-map-marker-alt mr-2"></i>Sorties</a>
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -33,11 +33,11 @@
                     <span class="nav-link">Mon Profil</span>
                 </li>
                 <li class="nav-item  mr-3">
-                    <a class="nav-link" href="logout"><i class="fas fa-user-times mr-2"></i>Déconnexion</a>
+                    <a class="nav-link" href="{{ path('app_logout') }}"><i class="fas fa-user-times mr-2"></i>Déconnexion</a>
                 </li>
             {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="login"><i class="fas fa-sign-in-alt mr-2"></i>Connexion</a>
+                    <a class="nav-link" href="{{ path('app_login') }}"><i class="fas fa-sign-in-alt mr-2"></i>Connexion</a>
                 </li>
             {% endif %}
         </ul>
