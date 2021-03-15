@@ -12,6 +12,7 @@ use App\Repository\EtatRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\SiteRepository;
 use App\Repository\SortieRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,7 +30,7 @@ class SortieController extends AbstractController
     {
         $sortie = $sortieRepository->findAll();
 
-        return $this->render('sortie/liste.html.twig', ["sortie" => $sortie]);
+        return $this->render('sortie/liste.html.twig', ["sorties" => $sortie]);
     }
 
     /**
@@ -45,7 +46,8 @@ class SortieController extends AbstractController
                                     EntityManagerInterface $em,
                                     SiteRepository $siteRepository,
                                     ParticipantRepository $participantRepository,
-                                    EtatRepository $etatRepository): Response
+                                    EtatRepository $etatRepository,
+                                    UserRepository $userRepository): Response
     {
         $sortie = new Sortie();
         $sortieForm = $this->createForm(SortieType::class, $sortie);
@@ -60,11 +62,12 @@ class SortieController extends AbstractController
             {
                 $sortie->setEtat($etatRepository->findOneBy(["libelle" => "Ouverte"]));
             }
-            $participant = $participantRepository->findOneBy(["nom" => "Derrien"]);
-            $site = $siteRepository->findOneBy(["id" => $participant->getEstRattacheA()]);
+            $user = $userRepository->findOneBy(["username" => $this->getUser()->getUsername()]);
+
+            $site = $siteRepository->findOneBy(["id" => $user->getParticipant()->getID()]);
 
             $sortie->setSite($site);
-            $sortie->setOrganisateur($participant);
+            $sortie->setOrganisateur($user->getParticipant());
             $em->persist($sortie);
             $em->flush();
             $this->addFlash("success", "Sortie créée avec succès !");

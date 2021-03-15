@@ -1,10 +1,14 @@
-
+{% extends('base.html.twig') %}
+{% block body %}
     <h2>Créer une sortie</h2>
     <div>
         {{ form_start(sortieForm) }}
         {{ form_widget(sortieForm) }}
-        <button class="btn-primary"><a href="{{ path('page_sortie') }}">Annuler</a></button>
+        <a href="{{ path('page_sortie') }}" class="btn btn-danger">Annuler</a>
         {{ form_end(sortieForm) }}
 
     </div>
 
+{% endblock %}
+
+{% block title %} Créer sortie {% endblock %}

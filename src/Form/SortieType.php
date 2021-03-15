@@ -66,7 +66,7 @@ class SortieType extends AbstractType
                 [
                     'label' => 'Enregistrer',
                     'attr' => [
-                        'class' => 'button',
+                        'class' => 'btn btn-secondary',
                     ],
                 ]
             )
@@ -76,7 +76,7 @@ class SortieType extends AbstractType
                 [
                     'label' => 'Publier la sortie',
                     'attr' => [
-                        'class' => 'button',
+                        'class' => 'btn btn-primary',
                     ],
                 ]
             )
