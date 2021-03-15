@@ -1,2 +1,30 @@
+{% extends('base.html.twig') %}
+{% block title %} Liste des sorties {% endblock %}
 
-    <h2>Idea list</h2>
+{% block body %}
+    <div class="container-fluid">
+        <h2>Idea list</h2>
+        <div class="row">
+        {% for sortie in sorties %}
+            <div class="col-sm-3 d-flex align-items-stretch">
+                    <div class="card">
+                        <img class="card-img-top" src="{{ asset("images/logo.png") }}" alt="Card image cap">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ sortie.nom }}</h5>
+                            <p class="card-text">{{ sortie.infosSortie|striptags|slice(0,50) }}
+                                {% if sortie.infosSortie|length > 50 %}
+                                    [...]
+                                {% endif %}
+                                <br>À {{ sortie.Lieu.Ville.Nom }} le {{ sortie.dateHeureDebut|date("m/d/Y", "Europe/Paris") }}
+                            </p>
+
+                        </div>
+                        <a href="{{ path('page_detail_sortie', {'id' : sortie.id}) }}" class="btn btn-secondary">Plus d'informations</a>
+                    </div>
+            </div>
+        {% endfor %}
+        </div>
+        <br>
+        <a href="{{ path('page_creer_sortie') }}" class="btn btn-primary">Créer une nouvelle sortie</a>
+    </div>
+{% endblock %}
