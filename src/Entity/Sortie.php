@@ -6,6 +6,7 @@ use App\Repository\SortieRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=SortieRepository::class)
@@ -20,11 +21,18 @@ class Sortie
     private $id;
 
     /**
+     * @Assert\NotBlank(message="Merci de renseigner un nom de sortie.")
+     * @Assert\Length(
+     *     min="2", max="255",
+     *     minMessage="2 caractères minimum.",
+     *     maxMessage="255 caractères maximum."
+     * )
      * @ORM\Column(type="string", length=255)
      */
     private $nom;
 
     /**
+     * @Assert\NotBlank(message="Merci de renseigner une date de début.")
      * @ORM\Column(type="datetime")
      */
     private $dateHeureDebut;
@@ -35,11 +43,18 @@ class Sortie
     private $duree;
 
     /**
+     * @Assert\NotBlank(message="Merci de renseigner une date limite d'inscription.")
      * @ORM\Column(type="datetime")
      */
     private $dateLimiteInscription;
 
     /**
+     * @Assert\NotBlank(message="Merci de renseigner un nombre d'inscriptions maximum.")
+     * @Assert\Length(
+     *     min="1", max="11",
+     *     minMessage="1 caractère minimum.",
+     *     maxMessage="11 caractères maximum."
+     * )
      * @ORM\Column(type="integer")
      */
     private $nbInscriptionMax;
@@ -62,6 +77,11 @@ class Sortie
     private $site;
 
     /**
+     * @Assert\Length(
+     *     min="2", max="255",
+     *     minMessage="2 caractères minimum.",
+     *     maxMessage="255 caractères maximum."
+     * )
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $infosSortie;
