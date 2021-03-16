@@ -26,18 +26,20 @@ class SortieController extends AbstractController
      * @Route("/sortie", name="page_sortie")
      * @param Request $request
      * @param SortieRepository $sortieRepository
-     * @param SiteRepository $siteRepository
      * @return Response
      */
-    public function liste(Request $request, SortieRepository $sortieRepository, SiteRepository $siteRepository): Response
+    public function liste(Request $request, SortieRepository $sortieRepository): Response
     {
         $sorties = $sortieRepository->findAll();
-        $sites = $siteRepository->findAll();
 
-        return $this->render('sortie/liste.html.twig', [
-            "sorties" => $sorties,
-            "sites" => $sites,
-            "title" => 'Liste des sorties'
+        $form = $this->createForm(SortieFiltreType::class);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid())
+        {
+
+        }
+        return $this->render('sortie/liste.html.twig', ["sorties" => $sorties, "form" => $form->createView(),
+                                    "title" => "Liste des sorties"
         ]);
     }
 

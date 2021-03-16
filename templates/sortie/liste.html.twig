@@ -1,61 +1,17 @@
 {% extends('base.html.twig') %}
 
 {% block body %}
-    <h1>{{ title }}</h1>
-    <div class="container-fluid">
-        <h2>Filtrer les sorties</h2>
 
+    <div class="container">
+        <h1>{{ title }}</h1>
 
-        <form action="{{ path('page_sortie') }}">
+        <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#filtres">Afficher les filtres</button>
+        <div id="filtres" class="collapse">
+            {{ form_start(form) }}
+            {{ form_widget(form) }}
+            {{ form_end(form) }}
+        </div>
 
-            <div class="row">
-                <div class="col-sm-4 d-flex">
-                <label for="site">Site </label>
-                <select class="form-control" id="site" name="site">
-                    {% for site in sites %}
-                        <option value="{{ site.id }}">{{ site.nom }}</option>
-                    {% endfor %}
-                </select>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4 d-flex">
-                    <label for="texteRecherche">Le nom de la sortie contient : </label>
-                    <input type="text" id="texteRecherche" name="texteRecherche">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-4 d-flex">
-                    <label for="heureDebut">Entre : </label>
-                    <input type="date" id="heureDebut" name="heureDebut">
-
-                    <label for="heureFin"> et : </label>
-                    <input type="date" id="heureFin" name="heureFin">
-                </div>
-            </div>
-
-            <div class="form-check">
-                <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="estOrganisateur" value="1">Sorties dont je suis l'organisateur/trice
-                </label>
-            </div>
-            <div class="form-check">
-                <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="estInscrit" value="1">Sorties auxquelles je suis inscrit/e
-                </label>
-            </div>
-            <div class="form-check">
-                <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="estPasInscrit" value="1">Sorties auxquelles je ne suis pas inscrit/e
-                </label>
-            </div>
-            <div class="form-check">
-                <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="estSortiePassee" value="1">Sorties passées
-                </label>
-            </div>
-            <button type="submit" class="btn btn-primary">Rechercher</button>
-        </form>
 
         <div class="row">
             <!--<div class="card-columns align-items-stretch">-->
