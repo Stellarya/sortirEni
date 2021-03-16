@@ -10,6 +10,25 @@ body {
     background-color: var(--white-color) !important;
 }
 
+h1, h2, h3, h4, h5 {
+    color: var(--primary-color) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color) !important;
+    border-color: var(--secondary-color) !important;);
+}
+
+.btn-danger {
+    background-color: var(--contrast-color) !important;
+    border-color: var(--contrast-color) !important;
+}
+
 /* NAVIGATION -------------------------------------------------------------------------------------------------------*/
 .navbar-light .navbar-nav .nav-item a.nav-link, #navbarSupportedContent .navbar-nav.user_nav span.nav-link{
     color: var(--primary-color);
@@ -21,4 +40,11 @@ body {
 
 .navbar-collapse .navbar-nav {
     padding-top: 15px;
+}
+
+/* CARD DETAILS SORTIES ---------------------------------------------------------------------------------------------*/
+.image_details {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
