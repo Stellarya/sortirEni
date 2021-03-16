@@ -7,6 +7,7 @@ use App\Entity\Participant;
 use App\Entity\Site;
 use App\Entity\Sortie;
 use App\Entity\User;
+use App\Form\SortieFiltreType;
 use App\Form\SortieType;
 use App\Repository\EtatRepository;
 use App\Repository\ParticipantRepository;
@@ -23,14 +24,17 @@ class SortieController extends AbstractController
 {
     /**
      * @Route("/sortie", name="page_sortie")
+     * @param Request $request
      * @param SortieRepository $sortieRepository
+     * @param SiteRepository $siteRepository
      * @return Response
      */
-    public function liste(SortieRepository $sortieRepository): Response
+    public function liste(Request $request, SortieRepository $sortieRepository, SiteRepository $siteRepository): Response
     {
-        $sortie = $sortieRepository->findAll();
+        $sorties = $sortieRepository->findAll();
+        $sites = $siteRepository->findAll();
 
-        return $this->render('sortie/liste.html.twig', ["sorties" => $sortie]);
+        return $this->render('sortie/liste.html.twig', ["sorties" => $sorties, "sites" => $sites]);
     }
 
     /**
@@ -40,6 +44,7 @@ class SortieController extends AbstractController
      * @param SiteRepository $siteRepository
      * @param ParticipantRepository $participantRepository
      * @param EtatRepository $etatRepository
+     * @param UserRepository $userRepository
      * @return Response
      */
     public function createSortie(Request $request,
@@ -65,8 +70,7 @@ class SortieController extends AbstractController
                 $sortie->setEtat($etatRepository->findOneBy(["libelle" => "Ouverte"]));
             }
             $user = $userRepository->findOneBy(["username" => $this->getUser()->getUsername()]);
-
-            $site = $siteRepository->findOneBy(["id" => $user->getParticipant()->getID()]);
+            $site = $siteRepository->findOneBy(["id" => $user->getParticipant()->getEstRattacheA()]);
 
             $sortie->setSite($site);
             $sortie->setOrganisateur($user->getParticipant());
@@ -74,7 +78,7 @@ class SortieController extends AbstractController
             $em->flush();
             $this->addFlash("success", "Sortie créée avec succès !");
 
-            return $this->redirectToRoute('home');
+            return $this->redirectToRoute('page_sortie');
         }
 
         return $this->render('sortie/formulaire.html.twig', ["sortieForm" => $sortieForm->createView()]);
