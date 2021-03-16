@@ -5,7 +5,7 @@
     <div class="container">
         <h1>{{ title }}</h1>
 
-        <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#filtres">Afficher les filtres</button>
+        <button type="button" class="btn btn-primary mb-3" data-toggle="collapse" data-target="#filtres">Afficher les filtres</button>
         <div id="filtres" class="collapse">
             {{ form_start(form) }}
             {{ form_widget(form) }}
@@ -13,7 +13,7 @@
         </div>
 
 
-        <div class="row">
+        <div class="row mt-3">
             <!--<div class="card-columns align-items-stretch">-->
         {% for sortie in sorties %}
             <div class="col-sm-3 d-flex align-items-stretch">
@@ -37,7 +37,7 @@
                             </p>
 
                         </div>
-                        <a href="{{ path('page_detail_sortie', {'id' : sortie.id}) }}" class="btn btn-secondary">Plus d'informations</a>
+                        <a href="{{ path('page_details_sortie', {'id' : sortie.id}) }}" class="btn btn-secondary">Plus d'informations</a>
                     </div>
             </div>
         {% endfor %}
