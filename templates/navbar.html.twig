@@ -34,7 +34,7 @@
                     <span class="nav-link"><i class="fas fa-user"></i> {{ app.user.username }}</span>
                 </li>
                 <li class="nav-item mr-3">
-                    <a class="nav-link"  href="#">Mon Profil</a>
+                    <a class="nav-link"  href="{{ path('profile_edit') }}">Mon Profil</a>
                 </li>
                 <li class="nav-item  mr-3">
                     <a class="nav-link" href="{{ path('app_logout') }}"><i class="fas fa-user-times mr-2"></i>Déconnexion</a>

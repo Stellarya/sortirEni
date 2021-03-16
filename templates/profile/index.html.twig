@@ -1,0 +1,116 @@
+{% extends 'base.html.twig' %}
+
+
+{% block body %}
+
+    <div class="container">
+        {{ form_start(form) }}
+        <div class="form-group mb-6 row">
+            <!-- Prénom -->
+            <label for="idee_title" class="col-2 col-form-label">
+                <span class="required">Prénom</span>
+            </label>
+            <div class="col-4">
+                {{ form_widget(form.participant.prenom, {"attr": {"class": "form-control"}}) }}
+            </div>
+
+            <!-- Nom -->
+            <label for="idee_title" class="col-2 col-form-label">
+                <span class="required">Nom</span>
+            </label>
+            <div class="col-4">
+                {{ form_widget(form.participant.nom, {"attr": {"class": "form-control"}}) }}
+            </div>
+
+            <!-- Téléphone -->
+            <label for="idee_title" class="col-2 col-form-label">
+                <span class="required">Téléphone</span>
+            </label>
+            <div class="col-4">
+                {{ form_widget(form.participant.telephone, {"attr": {"class": "form-control"}}) }}
+            </div>
+
+            <!-- Email -->
+            <label for="idee_title" class="col-2 col-form-label">
+                <span class="required">E-mail</span>
+            </label>
+            <div class="col-4">
+                {{ form_widget(form.user.email, {"attr": {"class": "form-control"}}) }}
+            </div>
+
+            <!-- Pseudo -->
+            <label for="idee_title" class="col-2 col-form-label">
+                <span class="required">Pseudo</span>
+            </label>
+            <div class="col-4">
+                {{ form_widget(form.user.username, {"attr": {"class": "form-control"}}) }}
+            </div>
+
+
+        </div>
+
+
+        <!-- BLOC MOT DE PASSE -->
+        <div class="form-group mb-6 row" id="bloc_mdp">
+            <!-- old passwd -->
+            <label for="idee_title" class="col-2 col-form-label">
+                <span class="required">Ancien mot de passe</span>
+            </label>
+            <div class="col-4">
+                {{ form_widget(form.user.old_password, {"attr": {"class": "form-control"}}) }}
+            </div>
+
+            <!-- new passwd -->
+            <label for="idee_title" class="col-2 col-form-label">
+                <span class="required">Nouveau mot de passe</span>
+            </label>
+            <div class="col-4">
+                {{ form_widget(form.user.new_password, {"attr": {"class": "form-control"}}) }}
+            </div>
+
+            <div class="col-6">
+                <a href="#" id="modif_mdp">Annuler</a>
+            </div>
+
+        </div>
+
+
+        {{ form_widget(form.enregistrer) }}
+
+
+        {{ form_end(form) }}
+    </div>
+
+
+
+    <script>
+        $( document ).ready(function() {
+
+            let enabled = true;
+            function toggle_bloc_mdp() {
+                enabled = !enabled;
+                $("#bloc_mdp input").each(function() {
+                    $(this).attr("disabled", !enabled);
+                })
+            }
+
+            $("#modif_mdp").click(function(e) {
+                e.preventDefault();
+                toggle_bloc_mdp();
+                if (!enabled) {
+                    $("#profile_user_old_password").val("");
+                    $("#profile_user_new_password_first").val("");
+                    $("#profile_user_new_password_second").val("");
+                }
+                $(this).html(enabled ? "Annuler" : "Modifier mot de passe");
+            })
+
+            $("#modif_mdp").click();
+
+        });
+    </script>
+
+
+{% endblock %}
+
+

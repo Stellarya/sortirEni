@@ -37,14 +37,25 @@ class AdminController extends AbstractController
         $this->denyAccessUnlessGranted("ROLE_ADMIN");
 
         // 1) build the form
-        $participant = new Participant();
-        $form = $this->createForm(RegisterType::class, $participant);
+        $user = new User();
+        $participant = ($user->getParticipant()) ?: new Participant();
+        $form = $this->createForm(RegisterType::class);
+
+        $participantForm = $form->get("participant");
+        $userForm = $form->get("user");
+
+        $participantForm->remove("estInscrit");
+        $userForm->remove("roles");
+        $userForm->remove("old_password");
+        $userForm->remove("new_password");
+
+        $participantForm->setData($participant);
+        $userForm->setData($user);
 
         // 2) handle the submit (will only happen on POST)
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $this->getDoctrine()->getConnection()->beginTransaction();
 
             //save participant
@@ -55,14 +66,9 @@ class AdminController extends AbstractController
 
             // save user
             $data = $form->getData();
-            $user = new User();
             $user->setRoles(["ROLE_USER"]);
-            $user->setUsername($form["username"]->getData());
-            $user->setPassword($form["password"]->getData());
-            $user->setEmail($form["email"]->getData());
             // 3) Encode the password (you could also do this via Doctrine listener)
-            $password = $passwordEncoder->encodePassword($user, $user->getPassword());
-            $user->setPassword($password);
+            $user->setPassword($passwordEncoder->encodePassword($user, $user->getPassword()));
             $user->setParticipant($participant);
             $entityManager->persist($user);
             $entityManager->flush();

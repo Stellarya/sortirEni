@@ -9,18 +9,7 @@
 {% form_theme form 'bootstrap_4_horizontal_layout.html.twig' %}
 
     <div class="container">
-        {{ form_start(form) }}
-        {{ form_row(form.estRattacheA) }}
-        {{ form_row(form.nom) }}
-        {{ form_row(form.prenom) }}
-        {{ form_row(form.telephone) }}
-
-        {{ form_row(form.username) }}
-        {{ form_row(form.password) }}
-        {{ form_row(form.email) }}
-
-        <button type="submit" class="btn btn-primary">Enregistrer l'utilisateur</button>
-        {{ form_end(form) }}
+        {{ form(form) }}
     </div>
 
 
