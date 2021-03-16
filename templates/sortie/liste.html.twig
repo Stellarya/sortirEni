@@ -12,7 +12,20 @@
             {{ form_end(form) }}
         </div>
 
-
+        {% if sorties|length == 0 %}
+        <div class="row mt-3">
+            <div class="col-sm-3 d-flex align-items-stretch">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Aucune sortie</h5>
+                        <p class="card-text">
+                            Il n'y a pas de sortie sur ce site avec ces filtres
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
         <div class="row mt-3">
             <!--<div class="card-columns align-items-stretch">-->
         {% for sortie in sorties %}

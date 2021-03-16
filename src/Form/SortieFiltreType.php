@@ -26,37 +26,44 @@ class SortieFiltreType extends AbstractType
             ->add('nom_recherche',
                 TextType::class,
                 [
-                    'label' => 'Le nom de la sortie contient : '
+                    'label' => 'Le nom de la sortie contient : ',
+                    'required' => false
                 ])
             ->add('dateDebut',
                 DateType::class,
                 [
-                    'label' => 'Entre '
+                    'label' => 'Entre ',
+                    'required' => false
                 ])
             ->add('dateFin',
                 DateType::class,
                 [
-                    'label' => 'et '
+                    'label' => 'et ',
+                    'required' => false
                 ])
             ->add('estOrganisateur',
                 CheckboxType::class,
                 [
-                    'label' => 'Sorties dont je suis l\'organisateur/trice'
+                    'label' => 'Sorties dont je suis l\'organisateur/trice',
+                    'required' => false
                 ])
             ->add('estInscrit',
                 CheckboxType::class,
                 [
-                    'label' => 'Sorties auxquelles je suis inscrit/e'
+                    'label' => 'Sorties auxquelles je suis inscrit/e',
+                    'required' => false
                 ])
             ->add('estPasInscrit',
                 CheckboxType::class,
                 [
-                    'label' => 'Sorties auxquelles je ne suis pas inscrit/e'
+                    'label' => 'Sorties auxquelles je ne suis pas inscrit/e',
+                    'required' => false
                 ])
             ->add('estSortiePassee',
                 CheckboxType::class,
                 [
-                    'label' => 'Sorties passées'
+                    'label' => 'Sorties passées',
+                    'required' => false
                 ])
             ->add(
                 'rechercher',
