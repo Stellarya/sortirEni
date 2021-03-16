@@ -49,6 +49,8 @@ class SortieController extends AbstractController
                                     EtatRepository $etatRepository,
                                     UserRepository $userRepository): Response
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $sortie = new Sortie();
         $sortieForm = $this->createForm(SortieType::class, $sortie);
 
