@@ -39,8 +39,7 @@ class SortieController extends AbstractController
         $this->siteID = $participantConnecte->getEstRattacheA()->getId();
         $form = $this->createForm(SortieFiltreType::class);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid())
-        {
+        if ($form->isSubmitted() && $form->isValid()) {
 
             $data = $form->getData();
             $site = isset($data["site"]);
@@ -132,7 +131,7 @@ class SortieController extends AbstractController
         });
 
         return $this->render('sortie/liste.html.twig', ["sorties" => $sorties, "form" => $form->createView(),
-                                    "title" => "Liste des sorties"
+            "title" => "Liste des sorties"
         ]);
     }
 
@@ -201,16 +200,34 @@ class SortieController extends AbstractController
     }
 
     /**
-     * @Route("/sortie/{id}", name="page_detail_sortie", requirements={"id": "\d+"})
+     * @Route("/sortie/{id}", name="page_details_sortie", requirements={"id": "\d+"})
      * @param SortieRepository $sortieRepository
      * @param int|null $id
      * @return Response
      */
     public function detailSortie(SortieRepository $sortieRepository, int $id = null): Response
     {
-        $sortie = $sortieRepository->findOneBy(["id" => $id]);
+        $sortie = $sortieRepository->find($id);
+        $nom = $sortie->getNom();
+        $lieu = $sortie->getLieu();
 
-        return $this->render('sortie/detail.html.twig', ["sortie" => $sortie]);
+        $dateHeure = $sortie->getDateHeureDebut()->getTimestamp();
+        $dateLimiteInscription = $sortie->getDateLimiteInscription()->getTimestamp();
+        $latitude = ($lieu->getLatitude()) ? : '-';
+        $longitude = ($lieu->getLongitude() ? : '-');
+
+        return $this->render('sortie/details.html.twig', [
+                "sortie" => $sortie,
+                'title' => 'Details de la sortie',
+                'nom' => $nom,
+                'lieu' => $lieu,
+                'dateHeure' => date('d/m/Y', $dateHeure) . ' à ' . date('H:m', $dateHeure),
+                'dateLimite' => date('d/m/Y', $dateLimiteInscription),
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+
+            ]
+        );
     }
 
     function array_sort($array, $on, $order=SORT_ASC)
