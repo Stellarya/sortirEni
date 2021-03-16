@@ -147,8 +147,10 @@ class AdminController extends AbstractController
         }
 
         return $this->render(
-            'admin/register_import.html.twig',
-            ['form' => $form->createView()]
+            'admin/register_import.html.twig', [
+                'form' => $form->createView(),
+                "title" => "Import d'une liste d'utilisateur"
+            ]
         );
     }
 }
