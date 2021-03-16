@@ -153,4 +153,14 @@ class User implements UserInterface, \Serializable
             // $this->salt
             ) = unserialize($serialized, ['allowed_classes' => false]);
     }
+
+    /**
+     * @throws Exception
+     */
+    public function checkFieldsValidity(): void {
+        if (!filter_var($this->getEmail(), FILTER_VALIDATE_EMAIL)) {
+            throw new Exception("L'email de l'utilisateur n'est pas valide");
+        }
+    }
+
 }
