@@ -25,8 +25,12 @@ class AdminController extends AbstractController
 
     /**
      * @Route("/admin/register", name="admin_register")
+     * @param Request $request
+     * @param UserPasswordEncoderInterface $passwordEncoder
+     * @return Response
      */
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response {
+    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
+    {
         $this->denyAccessUnlessGranted("ROLE_ADMIN");
 
         // 1) build the form
@@ -66,15 +70,21 @@ class AdminController extends AbstractController
         }
 
         return $this->render(
-            'admin/register.html.twig',
-            ['form' => $form->createView()]
+            'admin/register.html.twig', [
+                'form' => $form->createView(),
+                'title' => 'Inscription d\'un utilisateur'
+            ]
         );
     }
 
     /**
      * @Route("/admin/registercsv", name="admin_registercsv")
+     * @param Request $request
+     * @param UserPasswordEncoderInterface $passwordEncoder
+     * @return Response
      */
-    public function register_csv(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response {
+    public function register_csv(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
+    {
 
         foreach ([] as $a_user) {
 
