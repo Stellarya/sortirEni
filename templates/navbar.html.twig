@@ -14,6 +14,7 @@
             <li class="nav-item mr-3">
                 <a class="nav-link" href="{{ path('page_sortie') }}"><i class="fas fa-map-marker-alt mr-2"></i>Sorties</a>
             </li>
+            {% if is_granted("ROLE_ADMIN") %}
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="fas fa-cog mr-2"></i>Administration
@@ -21,8 +22,10 @@
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="#">Villes</a>
                     <a class="dropdown-item" href="#">Sites</a>
+                    <a class="dropdown-item" href="{{ path('admin_register') }}">Inscription utilisateur</a>
                 </div>
             </li>
+            {% endif %}
         </ul>
         <ul class="navbar-nav user_nav">
             {% if app.user %}

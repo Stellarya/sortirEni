@@ -24,9 +24,11 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @Route("/admin/register", name="register")
+     * @Route("/admin/register", name="admin_register")
      */
     public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+
         // 1) build the form
         $participant = new Participant();
         $form = $this->createForm(RegisterType::class, $participant);
@@ -39,7 +41,6 @@ class AdminController extends AbstractController
             $this->getDoctrine()->getConnection()->beginTransaction();
 
             //save participant
-            $participant->setAdministrateur(false);
             $participant->setActif(true);
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($participant);
@@ -48,6 +49,7 @@ class AdminController extends AbstractController
             // save user
             $data = $form->getData();
             $user = new User();
+            $user->setRoles(["ROLE_USER"]);
             $user->setUsername($form["username"]->getData());
             $user->setPassword($form["password"]->getData());
             $user->setEmail($form["email"]->getData());
@@ -60,7 +62,7 @@ class AdminController extends AbstractController
 
             $this->getDoctrine()->getConnection()->commit();
 
-            return $this->redirectToRoute('home');
+            $this->addFlash("success", "Utilisateur enregistré !");
         }
 
         return $this->render(
@@ -70,7 +72,7 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @Route("/admin/register_csv", name="register_csv")
+     * @Route("/admin/registercsv", name="admin_registercsv")
      */
     public function register_csv(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response {
 

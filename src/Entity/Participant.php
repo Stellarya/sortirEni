@@ -37,11 +37,6 @@ class Participant
     /**
      * @ORM\Column(type="boolean")
      */
-    private $administrateur;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
     private $actif;
 
     /**
@@ -101,17 +96,6 @@ class Participant
         return $this;
     }
 
-    public function getAdministrateur(): ?bool
-    {
-        return $this->administrateur;
-    }
-
-    public function setAdministrateur(bool $administrateur): self
-    {
-        $this->administrateur = $administrateur;
-
-        return $this;
-    }
 
     public function getActif(): ?bool
     {
