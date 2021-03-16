@@ -34,7 +34,11 @@ class SortieController extends AbstractController
         $sorties = $sortieRepository->findAll();
         $sites = $siteRepository->findAll();
 
-        return $this->render('sortie/liste.html.twig', ["sorties" => $sorties, "sites" => $sites]);
+        return $this->render('sortie/liste.html.twig', [
+            "sorties" => $sorties,
+            "sites" => $sites,
+            "title" => 'Liste des sorties'
+        ]);
     }
 
     /**
@@ -48,11 +52,11 @@ class SortieController extends AbstractController
      * @return Response
      */
     public function createSortie(Request $request,
-                                    EntityManagerInterface $em,
-                                    SiteRepository $siteRepository,
-                                    ParticipantRepository $participantRepository,
-                                    EtatRepository $etatRepository,
-                                    UserRepository $userRepository): Response
+                                 EntityManagerInterface $em,
+                                 SiteRepository $siteRepository,
+                                 ParticipantRepository $participantRepository,
+                                 EtatRepository $etatRepository,
+                                 UserRepository $userRepository): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
@@ -61,12 +65,10 @@ class SortieController extends AbstractController
 
         $sortieForm->handleRequest($request);
         if ($sortieForm->isSubmitted() && $sortieForm->isValid()) {
-            if ($sortieForm->get('enregistrer')->isClicked())
-            {
+            if ($sortieForm->get('enregistrer')->isClicked()) {
                 $sortie->setEtat($etatRepository->findOneBy(["libelle" => "Créée"]));
             }
-            if ($sortieForm->get('publier')->isClicked())
-            {
+            if ($sortieForm->get('publier')->isClicked()) {
                 $sortie->setEtat($etatRepository->findOneBy(["libelle" => "Ouverte"]));
             }
             $user = $userRepository->findOneBy(["username" => $this->getUser()->getUsername()]);
@@ -81,7 +83,10 @@ class SortieController extends AbstractController
             return $this->redirectToRoute('page_sortie');
         }
 
-        return $this->render('sortie/formulaire.html.twig', ["sortieForm" => $sortieForm->createView()]);
+        return $this->render('sortie/formulaire.html.twig', [
+            "sortieForm" => $sortieForm->createView(),
+            "title" => "Créer une sortie"
+        ]);
     }
 
     /**
@@ -90,7 +95,7 @@ class SortieController extends AbstractController
      * @param int|null $id
      * @return Response
      */
-    public function detailSortie(SortieRepository $sortieRepository, int $id = null) : Response
+    public function detailSortie(SortieRepository $sortieRepository, int $id = null): Response
     {
         $sortie = $sortieRepository->findOneBy(["id" => $id]);
 
