@@ -25,7 +25,9 @@
         {% include "navbar.html.twig" %}
         {% include "messages.html.twig" %}
 
+        <div class="container">
         {% block body %}{% endblock %}
+        </div>
         {% block javascripts %}
             <!-- bootstrap 4 -->
             <script src="{{ asset('lib/bootstrap-4/js/bootstrap.min.js')}}"></script>
