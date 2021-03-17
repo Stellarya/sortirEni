@@ -3,25 +3,41 @@
 
 {% block body %}
 
-    <h1>{{ title }}</h1>
-
 
 {% form_theme form 'bootstrap_4_horizontal_layout.html.twig' %}
+    {{ form_start(form) }}
+    {% embed './admin/_register_form.html.twig' %}
+        {% block informations %}
 
-    <div class="container">
-        {{ form_start(form) }}
-        {{ form_row(form.estRattacheA) }}
-        {{ form_row(form.nom) }}
-        {{ form_row(form.prenom) }}
-        {{ form_row(form.telephone) }}
+            {% for field in form.participant %}
+                <div class="col-sm-4">
+                    <p class="m-b-10 f-w-600">{{ field.vars.label }}</p>
+                    <h6 class="text-muted f-w-400">{{ form_widget(field, {"attr": {"class": "form-control"}}) }}</h6>
+                </div>
+            {% endfor %}
 
-        {{ form_row(form.username) }}
-        {{ form_row(form.password) }}
-        {{ form_row(form.email) }}
+            <div class="col-sm-12">
+                &nbsp;
+            </div>
 
-        <button type="submit" class="btn btn-primary">Enregistrer l'utilisateur</button>
-        {{ form_end(form) }}
-    </div>
+            {% for field in form.user %}
+                <div class="col-sm-4">
+                    <p class="m-b-10 f-w-600">{{ field.vars.label }}</p>
+                    <h6 class="text-muted f-w-400">{{ form_widget(field, {"attr": {"class": "form-control"}}) }}</h6>
+                </div>
+            {% endfor %}
+
+        {% endblock %}
+
+
+        {% block actions %}
+            <div class="col-sm-12">
+                {{ form_widget(form.enregistrer) }}
+            </div>
+        {% endblock %}
+
+    {% endembed %}
+    {{ form_end(form) }}
 
 
 {% endblock %}
