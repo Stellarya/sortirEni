@@ -6,20 +6,52 @@ use App\Entity\Participant;
 use App\Entity\User;
 use App\Form\EditProfileType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class ProfileController extends AbstractController
 {
+
+
+    /**
+     * @Route("/profile/{id<\d+>?0}", name="profile_view")
+     * @param Request $request
+     */
+    public function profile(Request $request, int $id) {
+        $this->denyAccessUnlessGranted("IS_AUTHENTICATED_FULLY");
+
+        $entityManager = $this->getDoctrine()->getManager();
+
+        if ($id > 0) {
+            $user = $entityManager->getRepository(User::class)->find($id);
+            $title = "Profile de {$user->getParticipant()->getPrenom()}";
+        } else {
+            $user = $this->getUser();
+            $title = "Mon profil";
+        }
+
+
+        return $this->render('profile/view.html.twig', [
+            "controller_name" => "ProfileController",
+            "user" => $user,
+            "title" => $title
+        ]);
+
+    }
+
+
     /**
      * @Route("/profile/edit", name="profile_edit")
      * @param Request $request
      * @param UserPasswordEncoderInterface $passwordEncoder
+     * @param SluggerInterface $slugger
      * @return Response
      */
-    public function index(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
+    public function profile_edit(Request $request, UserPasswordEncoderInterface $passwordEncoder, SluggerInterface $slugger): Response
     {
         $this->denyAccessUnlessGranted("IS_AUTHENTICATED_FULLY");
         $form = $this->createForm(EditProfileType::class);
@@ -51,6 +83,26 @@ class ProfileController extends AbstractController
                         }
                         $user->setPassword($passwordEncoder->encodePassword($user, $userForm["new_password"]->getData()));
                     }
+
+                    $avatarFile = $userForm["avatar"]->getData();
+                    if ($avatarFile) {
+                        $originalFilename = pathinfo($avatarFile->getClientOriginalName(), PATHINFO_FILENAME);
+                        // this is needed to safely include the file name as part of the URL
+                        $safeFilename = $slugger->slug($originalFilename);
+                        $newFilename = $safeFilename.'-'.uniqid().'.'.$avatarFile->guessExtension();
+
+                        // Move the file to the directory where brochures are stored
+                        try {
+                            $avatarFile->move(
+                                $this->getParameter('avatar_directory'),
+                                $newFilename
+                            );
+                            $user->setAvatar($newFilename);
+                        } catch (FileException $e) {
+                            $this->addFlash("alert", $e->getMessage());
+                        }
+                    }
+
                     $em = $this->getDoctrine()->getManager();
                     $em->persist($participant);
                     $em->persist($user);
@@ -64,10 +116,10 @@ class ProfileController extends AbstractController
             }
         }
 
-        return $this->render('profile/index.html.twig', [
+        return $this->render('profile/edit.html.twig', [
             'controller_name' => 'ProfileController',
             'form' => $form->createView(),
-            'title' => 'Mon profil'
+            'title' => 'Édition profil'
         ]);
     }
 }

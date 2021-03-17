@@ -1,0 +1,117 @@
+{% extends 'base.html.twig' %}
+
+
+{% block body %}
+
+    {% set user = form.user.vars.value %}
+    {% set participant = form.participant.vars.value %}
+    {{ form_start(form) }}
+    {% embed './profile/_profile_card.html.twig' %}
+
+        {% block informations %}
+
+            <div class="col-sm-4">
+                <p class="m-b-10 f-w-600">Prénom</p>
+                <h6 class="text-muted f-w-400">{{ form_widget(form.participant.prenom, {"attr": {"class": "form-control"}}) }}</h6>
+            </div>
+
+            <div class="col-sm-4">
+                <p class="m-b-10 f-w-600">Nom</p>
+                <h6 class="text-muted f-w-400">{{ form_widget(form.participant.nom, {"attr": {"class": "form-control"}}) }}</h6>
+            </div>
+
+            <div class="col-sm-4">
+                <p class="m-b-10 f-w-600">Téléphone</p>
+                <h6 class="text-muted f-w-400">{{ form_widget(form.participant.telephone, {"attr": {"class": "form-control"}}) }}</h6>
+            </div>
+
+            <div class="col-sm-4">
+                <p class="m-b-10 f-w-600">E-mail</p>
+                <h6 class="text-muted f-w-400">{{ form_widget(form.user.email, {"attr": {"class": "form-control"}}) }}</h6>
+            </div>
+
+            <div class="col-sm-4">
+                <p class="m-b-10 f-w-600">Pseudo</p>
+                <h6 class="text-muted f-w-400">{{ form_widget(form.user.username, {"attr": {"class": "form-control"}}) }}</h6>
+            </div>
+
+            <div class="col-sm-4">
+                <p class="m-b-10 f-w-600">Avatar</p>
+                <h6 class="text-muted f-w-400">{{ form_widget(form.user.avatar)}}</h6>
+            </div>
+
+            <div id="cell_mdp" class="col-sm-4">
+                <p class="m-b-10 f-w-600">Mot de passe</p>
+                <h6 class="text-muted f-w-400">
+                    <a href="#" id="modif_mdp">Changer le mot de passe</a>
+                </h6>
+            </div>
+
+
+            <div id="bloc_mdp" class="col-sm-12" style="display: none;">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <h6 class="m-b-20 m-t-40 p-b-5 b-b-default f-w-600">Mot de passe</h6>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <p class="m-b-10 f-w-600">Ancien mot de passe</p>
+                        <h6 class="text-muted f-w-400">{{ form_widget(form.user.old_password, {"attr": {"class": "form-control"}}) }}</h6>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <p class="m-b-10 f-w-600">Nouveau mot de passe</p>
+                        <h6 class="text-muted f-w-400">{{ form_widget(form.user.new_password.first, {"attr": {"class": "form-control"}}) }}</h6>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <p class="m-b-10 f-w-600">Nouveau mot de passe</p>
+                        <h6 class="text-muted f-w-400">{{ form_widget(form.user.new_password.second, {"attr": {"class": "form-control"}}) }}</h6>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <h6 class="text-muted f-w-400">
+                            <a href="#" id="cancel_mdp">Annuler</a>
+                        </h6>
+                    </div>
+
+                </div>
+            </div>
+
+
+        {% endblock %}
+
+        {% block actions %}
+            <div class="col-sm-12">
+                <a href="{{ path("profile_view") }}"><button type="button" class="btn btn-light"><i class="fas fa-arrow-left"></i> Retour au profil</button></a>
+                {{ form_widget(form.enregistrer) }}
+            </div>
+        {% endblock %}
+
+    {% endembed %}
+
+    {{ form_end(form) }}
+
+    <script>
+        $( document ).ready(function() {
+            $("#cancel_mdp").click(function(e) {
+                e.preventDefault();
+                $("#bloc_mdp input").each(function() {
+                    $(this).val("");
+                })
+                $("#bloc_mdp").hide();
+                $("#cell_mdp").show();
+            })
+
+            $("#modif_mdp").click(function(e) {
+                e.preventDefault();
+                $("#bloc_mdp").show();
+                $("#cell_mdp").hide();
+            })
+        });
+    </script>
+
+
+{% endblock %}
+
+

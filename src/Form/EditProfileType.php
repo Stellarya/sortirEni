@@ -25,7 +25,7 @@ class EditProfileType extends AbstractType
                 [
                     'label' => 'Enregistrer',
                     'attr' => [
-                        'class' => 'btn btn-secondary',
+                        'class' => 'btn btn-light',
                     ],
                 ]
             )

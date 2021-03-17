@@ -17,11 +17,20 @@ class ParticipantType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('nom', TextType::class)
-            ->add('prenom', TextType::class)
-            ->add('telephone', TextType::class)
-            ->add('actif', CheckboxType::class)
+            ->add('nom', TextType::class, [
+                "label" => "Nom",
+            ])
+            ->add('prenom', TextType::class, [
+                "label" => "Prénom",
+            ])
+            ->add('telephone', TextType::class, [
+                "label" => "Téléphone",
+            ])
+            ->add('actif', CheckboxType::class, [
+                "label" => "Actif",
+            ])
             ->add("estRattacheA", EntityType::class, [
+                "label" => "Site",
                 "class" => Site::class,
                 "query_builder" => function(EntityRepository $er) {
                     return $er->createQueryBuilder("s")->orderBy("s.nom", "ASC");
