@@ -57,8 +57,8 @@
                         </div>
                         <p class="card-text">
                             {% if participants|length < sortie.nbInscriptionMax and date(sortie.dateLimiteInscription) > date() %}
-                                <a href="{{ path('page_inscription_sortie', {'id' : sortie.id, 'idParticipant' : app.user.id} ) }}"
-                                   class="btn btn-secondary">S'inscrire</a>
+                                <button id="inscription_sortie"
+                                   class="btn btn-secondary">S'inscrire</button>
                             {% endif %}
 
                             <a href="{{ path('page_formulaire_sortie', {'id' : sortie.id}) }}" class="btn btn-danger">Modifier</a>
@@ -68,4 +68,27 @@
             </div>
         </div>
     </div>
+{% endblock %}
+{% block javascripts %}
+    <script>
+
+        let countClick = 0;
+        function inscriptionSortie() {
+            if (countClick === 0) {
+                $.post('{{ path('page_inscription_sortie') }}', {
+                        id: {{ sortie.id }},
+                        idParticipant: {{ app.user.participant.id }}
+                    }, 'html');
+
+            }
+            countClick++;
+        };
+        $(document).ready(function () {
+            // bouton ajout
+            $('#inscription_sortie').on('click', () => {
+                inscriptionSortie();
+            });
+        })
+
+    </script>
 {% endblock %}
