@@ -7,7 +7,8 @@
                     {% if sortie.id is divisible by (2) %}
                         <img class="card-img image_details" src="{{ asset("images/thabor.jpg") }}" alt="Card image cap">
                     {% else %}
-                        <img class="card-im image_details" src="{{ asset("images/thabor2.jpg") }}" alt="Card image cap">
+                        <img class="card-img image_details" src="{{ asset("images/thabor2.jpg") }}"
+                             alt="Card image cap">
                     {% endif %}
                 </div>
                 <div class="col-md-8">
@@ -16,24 +17,50 @@
                         <div class="card-text">
                             <div class="row">
                                 <div class="col-6">
-                                    <p>Date et Heure de la sortie : <span>{{ dateHeure }}</span></p>
+                                    <p>Date et Heure de la sortie : {{ dateHeure }}</p>
                                     <p>Duree : {{ sortie.duree }} minutes</p>
-                                    <p>Date limite d'inscription : <span>{{ dateLimite }}</span></p>
+                                    <p>Date limite d'inscription : {{ dateLimite }}</p>
                                     <p>Nombre de place : {{ sortie.nbInscriptionMax }}</p>
                                     <p>Descriptions et infos : {{ sortie.infosSortie }}</p>
                                 </div>
                                 <div class="col-6">
-                                    <p>Lieu : <span>{{ lieu.nom }}</span></p>
+                                    <p>Lieu : {{ lieu.nom }}</p>
                                     <p>Rue : {{ lieu.rue }}</p>
                                     <p>Ville : {{ lieu.ville.codePostal }} {{ lieu.ville.nom }}</p>
                                     <p>Latitude : {{ latitude }}</p>
                                     <p>Longitude : {{ longitude }}</p>
                                 </div>
                             </div>
+                            <h5>Participants</h5>
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Prenom</th>
+                                    <th scope="col">Nom</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if participants is not empty and participants is not null %}
+                                    {% for participant in participants %}
+                                    <tr>
+                                        <td>{{ participant.prenom }}</td>
+                                        <td>{{ participant.nom }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4">Il n'y a pas de participants</td>
+                                    </tr>
+                                {% endif %}
+                                </tbody>
+                            </table>
                         </div>
                         <p class="card-text">
-                            <a href="{{ path('page_inscription_sortie', {'id' : sortie.id}) }}"
-                               class="btn btn-secondary">S'inscrire</a>
+                            {% if participants|length < sortie.nbInscriptionMax %}
+                                <a href="{{ path('page_inscription_sortie', {'id' : sortie.id, 'idParticipant' : app.user.id} ) }}"
+                                   class="btn btn-secondary">S'inscrire</a>
+                            {% endif %}
+
                             <a href="{{ path('page_modifier_sortie', {'id' : sortie.id}) }}" class="btn btn-danger">Modifier</a>
                         </p>
                     </div>

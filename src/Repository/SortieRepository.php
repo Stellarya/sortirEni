@@ -159,6 +159,21 @@ class SortieRepository extends ServiceEntityRepository
             ->where($qb->expr()->eq('e.id', '2'));
         return $qb->getQuery()->getResult();
     }
+
+    /**
+     * @return int|mixed|string
+     */
+    public function getNbParticipantBySorties($id){
+        $connexion = $this->getEntityManager()->getConnection();
+
+        $sql = 'SELECT COUNT(*) as nbparticipant 
+                FROM participant
+                I';
+        $stmt = $connexion->prepare($sql);
+        $stmt->execute([]);
+        $tResult = $stmt->fetch();
+        return $tResult['nbcand'];
+    }
     /*
     public function findOneBySomeField($value): ?Sortie
     {
