@@ -16,33 +16,70 @@ use App\Repository\SortieRepository;
 use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\QueryException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class SortieController extends AbstractController
 {
     public $siteID = null;
+
     /**
-     * @Route("/sortie", name="page_sortie")
+     * @Route("/sortie/{pageNumber}", name="page_sortie")
      * @param Request $request
      * @param SortieRepository $sortieRepository
      * @param UserRepository $userRepository
+     * @param SessionInterface $session
+     * @param int $pageNumber
      * @return Response
+     * @throws QueryException
      */
-    public function liste(Request $request, SortieRepository $sortieRepository, UserRepository $userRepository): Response
+    public function liste(Request $request,
+        SortieRepository $sortieRepository,
+        UserRepository $userRepository,
+        SessionInterface $session,
+        int $pageNumber = 1): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-        $sorties = $sortieRepository->findSortiesPubliees();
-        $participantConnecte = $userRepository->findOneBy(["username" => $this->getUser()->getUsername()])->getParticipant();
+
+        $maxResults = $session->get("maxResult");
+        if(!isset($maxResults)){
+            $session->set("maxResult", 12);
+        }
+
+        if($request->getMethod() === 'POST'){
+            $data = $request->get('ideaPerPage');
+        }
+        if(isset($data) && $data > 0) {
+            $session->set("maxResult", $data);
+        }
+        $maxResults = $session->get("maxResult");
+
+        $participantConnecte = $userRepository->findOneBy(
+            ["username" => $this->getUser()->getUsername()]
+        )->getParticipant();
         $this->siteID = $participantConnecte->getEstRattacheA()->getId();
+        $sorties = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
+        list($nbPage, $pagesAafficher) = $this->getInfosPourPagination($sortieRepository, $maxResults, $pageNumber, $session);
+
+        $dataFromSession = $session->get('data');
+
+
         $form = $this->createForm(SortieFiltreType::class);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-
+        if (($form->isSubmitted() && $form->isValid()) || isset($dataFromSession)) {
             $data = $form->getData();
-            $site = isset($data["site"]);
+            if(!isset($data))
+            {
+                $data = $dataFromSession;
+            } else
+            {
+                $pageNumber = 1;
+            }
+            $session->set('data', $data);
             $txtRecherche = isset($data["nom_recherche"]);
             $dateDebut = isset($data["dateDebut"]);
             $dateFin = isset($data["dateFin"]);
@@ -56,83 +93,57 @@ class SortieController extends AbstractController
             {
                 $sorties = [];
 
-                if($txtRecherche)
-                {
-                    $texte = $data["nom_recherche"];
-                    $sortiesConcernees = $sortieRepository->findSortiesParTexte($texte);
-                    $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
-                }
-
-                if($dateDebut && $dateFin)
-                {
-                    $dateD = $data["dateDebut"];
-                    $dateF = $data["dateFin"];
-                    $sortiesConcernees = $sortieRepository->findSortiesEntreDeuxDates($dateD, $dateF);
-                    $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
-                } elseif ($dateDebut)
-                {
-                    $dateD = $data["dateDebut"];
-                    $sortiesConcernees = $sortieRepository->findSortiesApresUneDate($dateD);
-                    $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
-                } elseif ($dateFin)
-                {
-                    $dateF = $data["dateFin"];
-                    $sortiesConcernees = $sortieRepository->findSortiesAvantUneDate($dateF);
-                    $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
-                }
-
-                if ($estOrganisateur || $estInscrit || $estPasInscrit)
-                {
-                    $participantConnecte = $userRepository->findOneBy(["username" => $this->getUser()->getUsername()]
-                    )->getParticipant();
-                    $participantID = $participantConnecte->getID();
-                    if ($estOrganisateur) {
-                        $sortiesConcernees = $sortieRepository->findSortiesByOrganisateur($participantID);
-                        $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
-                    }
-                    if ($estInscrit) {
-                        $sortiesConcernees = $sortieRepository->findSortiesByParticipant($participantID);
-                        $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
-                    }
-                    if ($estPasInscrit) {
-                        $sortiesConcernees = $sortieRepository->findSortiesByParticipantPasInscrit($participantID);
-                        $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
-                    }
-                }
-
-                if($estSortiePassee)
-                {
-                    $dateJour = new DateTime('NOW');
-                    $date = date_format($dateJour, "Y-m-d G:i:s");
-                    $sortiesConcernees = $sortieRepository->findSortiesParDatePassee($date);
-                    $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
-                }
+                $sorties = $this->GestionFiltres(
+                    $txtRecherche,
+                    $data,
+                    $sortieRepository,
+                    $sorties,
+                    $dateDebut,
+                    $dateFin,
+                    $estOrganisateur,
+                    $estInscrit,
+                    $estPasInscrit,
+                    $userRepository,
+                    $estSortiePassee,
+                    $maxResults,
+                    $pageNumber,
+                    $session
+                );
 
             } else
             {
-                if($this->siteID == $data["site"]->getId()) {
-                    $sorties = [];
-                    $sortiesConcernees = $sortieRepository->findSortiesParSite($this->siteID);
-                    $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
-                }
-            }
 
+                    $sorties = [];
+                    $sortiesConcernees = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
+                    $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
+                    $session->set('nbSorties', count($sorties));
+                    $firstResult = ($pageNumber - 1) * $maxResults;
+                    $sorties = array_slice($sorties, $firstResult, $maxResults);
+
+            }
+            list($nbPage, $pagesAafficher) = $this->getInfosPourPagination($sortieRepository, $maxResults, $pageNumber, $session);
         }
 
-        usort($sorties, function($a, $b) {
-            $ad = $a->getDateHeureDebut();
-            $bd = $b->getDateHeureDebut();
+        $sorties = $this->triSortiesParDate($sorties);
+        $session->set('sorties', $sorties);
+        if ($pageNumber <= $nbPage && $pageNumber > 0) {
+            return $this->render(
+                'sortie/liste.html.twig',
+                [
+                    'sorties' => $sorties,
+                    'ideaCountPage' => $nbPage,
+                    'pageNumber' => $pageNumber,
+                    'pagesToDisplay' => $pagesAafficher,
+                    'firstEllipsis' => $pageNumber-2,
+                    'secondEllipsis' => $pageNumber+3,
+                    'maxResults' => $maxResults,
+                    'form' => $form->createView(),
+                    'title' => "Liste des sorties"
+                ]
+            );
+        }
 
-            if ($ad == $bd) {
-                return 0;
-            }
-
-            return $ad < $bd ? -1 : 1;
-        });
-
-        return $this->render('sortie/liste.html.twig', ["sorties" => $sorties, "form" => $form->createView(),
-            "title" => "Liste des sorties"
-        ]);
+        return $this->redirectToRoute('page_sortie', ['pageNumber' => 1]);
     }
 
     /**
@@ -200,7 +211,7 @@ class SortieController extends AbstractController
     }
 
     /**
-     * @Route("/sortie/{id}", name="page_details_sortie", requirements={"id": "\d+"})
+     * @Route("/sortie/detail/{id}", name="page_details_sortie", requirements={"id": "\d+"})
      * @param SortieRepository $sortieRepository
      * @param int|null $id
      * @return Response
@@ -230,39 +241,143 @@ class SortieController extends AbstractController
         );
     }
 
-    function array_sort($array, $on, $order=SORT_ASC)
-    {
-        $new_array = array();
-        $sortable_array = array();
+    /**
+     * @param bool $txtRecherche
+     * @param $data
+     * @param SortieRepository $sortieRepository
+     * @param array $sorties
+     * @param bool $dateDebut
+     * @param bool $dateFin
+     * @param $estOrganisateur
+     * @param $estInscrit
+     * @param $estPasInscrit
+     * @param UserRepository $userRepository
+     * @param $estSortiePassee
+     * @param $maxResults
+     * @param $pageNumber
+     * @param SessionInterface $session
+     * @return array
+     * @throws QueryException
+     */
+    public function GestionFiltres(
+        bool $txtRecherche,
+        $data,
+        SortieRepository $sortieRepository,
+        array $sorties,
+        bool $dateDebut,
+        bool $dateFin,
+        $estOrganisateur,
+        $estInscrit,
+        $estPasInscrit,
+        UserRepository $userRepository,
+        $estSortiePassee,
+        $maxResults,
+        $pageNumber,
+        SessionInterface $session
+    ): array {
+        if ($txtRecherche) {
+            $texte = $data["nom_recherche"];
+            $sortiesConcernees = $sortieRepository->findSortiesParTexte($texte);
+            $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
+        }
 
-        if (count($array) > 0) {
-            foreach ($array as $k => $v) {
-                if (is_array($v)) {
-                    foreach ($v as $k2 => $v2) {
-                        if ($k2 == $on) {
-                            $sortable_array[$k] = $v2;
-                        }
-                    }
-                } else {
-                    $sortable_array[$k] = $v;
-                }
+        if ($dateDebut && $dateFin) {
+            $dateD = $data["dateDebut"];
+            $dateF = $data["dateFin"];
+
+            $sortiesConcernees = $sortieRepository->findSortiesEntreDeuxDates($dateD, $dateF);
+            $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
+        } elseif ($dateDebut) {
+            $dateD = $data["dateDebut"];
+            $sortiesConcernees = $sortieRepository->findSortiesApresUneDate($dateD);
+            $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
+        } elseif ($dateFin) {
+            $dateF = $data["dateFin"];
+            $sortiesConcernees = $sortieRepository->findSortiesAvantUneDate($dateF);
+            $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
+        }
+
+        if ($estOrganisateur || $estInscrit || $estPasInscrit) {
+            $participantConnecte = $userRepository->findOneBy(
+                ["username" => $this->getUser()->getUsername()]
+            )->getParticipant();
+            $participantID = $participantConnecte->getID();
+            if ($estOrganisateur) {
+                $sortiesConcernees = $sortieRepository->findSortiesByOrganisateur($participantID);
+                $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
             }
-
-            switch ($order) {
-                case SORT_ASC:
-                    asort($sortable_array);
-                    break;
-                case SORT_DESC:
-                    arsort($sortable_array);
-                    break;
+            if ($estInscrit) {
+                $sortiesConcernees = $sortieRepository->findSortiesByParticipant($participantID);
+                $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
             }
-
-            foreach ($sortable_array as $k => $v) {
-                $new_array[$k] = $array[$k];
+            if ($estPasInscrit) {
+                $sortiesConcernees = $sortieRepository->findSortiesByParticipantPasInscrit($participantID);
+                $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
             }
         }
 
-        return $new_array;
+        if ($estSortiePassee) {
+            $dateJour = new DateTime('NOW');
+            $date = date_format($dateJour, "Y-m-d G:i:s");
+            $sortiesConcernees = $sortieRepository->findSortiesParDatePassee($date);
+            $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
+        }
+
+        $session->set('nbSorties', count($sorties));
+        $firstResult = ($pageNumber - 1) * $maxResults;
+        $sorties = array_slice($sorties, $firstResult, $maxResults);
+
+        return $sorties;
+    }
+
+    /**
+     * @param array $sorties
+     * @return array
+     */
+    public function triSortiesParDate(array $sorties): array
+    {
+        usort(
+            $sorties,
+            function ($a, $b) {
+                $ad = $a->getDateHeureDebut();
+                $bd = $b->getDateHeureDebut();
+
+                if ($ad == $bd) {
+                    return 0;
+                }
+
+                return $ad > $bd ? -1 : 1;
+            }
+        );
+
+        return $sorties;
+    }
+
+    /**
+     * @param SortieRepository $sortieRepository
+     * @param int $maxResults
+     * @param int $pageNumber
+     * @param SessionInterface $session
+     * @return array
+     */
+    public function getInfosPourPagination(SortieRepository $sortieRepository,
+        int $maxResults,
+        int $pageNumber,
+        SessionInterface $session): array
+    {
+        $nbSortiesSession = $session->get('nbSorties');
+        if(isset($nbSortiesSession)) {
+            $nbSorties = $nbSortiesSession;
+            $session->remove('nbSorties');
+        } else {
+            $nbSorties = $sortieRepository->countSorties();
+        }
+
+        $nbPage = ceil($nbSorties / $maxResults);
+        $pagesAafficher = array($pageNumber - 1, $pageNumber + 1, $pageNumber + 2);
+        if($nbPage == 0)
+            $nbPage = 1;
+        return array($nbPage, $pagesAafficher);
     }
 
 }
