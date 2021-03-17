@@ -144,4 +144,8 @@ class Participant
 
         return $this;
     }
+
+    public function getIdentite(): string {
+        return "{$this->getPrenom()} {$this->getNom()}";
+    }
 }
