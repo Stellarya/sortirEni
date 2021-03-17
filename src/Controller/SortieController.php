@@ -14,6 +14,7 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -55,7 +56,7 @@ class SortieController extends AbstractController
             $session->set("maxResult", $data);
         }
         $maxResults = $session->get("maxResult");
-        
+
         $participantConnecte = $userRepository->findOneBy(
             ["username" => $this->getUser()->getUsername()]
         )->getParticipant();
@@ -332,6 +333,30 @@ class SortieController extends AbstractController
     }
 
     /**
+     * @Route("/sortie/annulation/{id}", name="page_annulation_sortie")
+     * @param SortieRepository $sortieRepository
+     * @param int $id
+     * @return JsonResponse|RedirectResponse
+     */
+    public function annulationSortie(SortieRepository $sortieRepository,
+                                     int $id)
+    {
+        $oSortie = $sortieRepository->find($id);
+        if ($oSortie) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($oSortie);
+            $em->flush();
+
+            return $this->redirectToRoute('page_sortie');
+        } else {
+            return new JsonResponse([
+                'errorMessage' => 'Erreur ! La sortie à supprimer n\'existe pas.'
+            ]);
+        }
+
+    }
+
+    /**
      * @param bool $txtRecherche
      * @param $data
      * @param SortieRepository $sortieRepository
@@ -349,22 +374,20 @@ class SortieController extends AbstractController
      * @return array
      * @throws QueryException
      */
-    public function GestionFiltres(
-        bool $txtRecherche,
-        $data,
-        SortieRepository $sortieRepository,
-        array $sorties,
-        bool $dateDebut,
-        bool $dateFin,
-        $estOrganisateur,
-        $estInscrit,
-        $estPasInscrit,
-        UserRepository $userRepository,
-        $estSortiePassee,
-        $maxResults,
-        $pageNumber,
-        SessionInterface $session
-    ): array
+    public function GestionFiltres(bool $txtRecherche,
+                                   $data,
+                                   SortieRepository $sortieRepository,
+                                   array $sorties,
+                                   bool $dateDebut,
+                                   bool $dateFin,
+                                   $estOrganisateur,
+                                   $estInscrit,
+                                   $estPasInscrit,
+                                   UserRepository $userRepository,
+                                   $estSortiePassee,
+                                   $maxResults,
+                                   $pageNumber,
+                                   SessionInterface $session): array
     {
         if ($txtRecherche) {
             $texte = $data["nom_recherche"];

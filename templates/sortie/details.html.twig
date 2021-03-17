@@ -65,7 +65,7 @@
                                           method="post" class="mr-2">
                                         <input type="hidden" value="{{ app.user.participant.id }}"
                                                name="idParticipant">
-                                        <button id="inscription_sortieee" type="submit"
+                                        <button id="inscription_sortie" type="submit"
                                                 class="btn btn-secondary">S'inscrire
                                         </button>
                                     </form>
@@ -75,14 +75,23 @@
                                           method="post"
                                           class="ml-2">
                                         <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
-                                        <button id="desinscription_sortieee" type="submit"
+                                        <button id="desinscription_sortie" type="submit"
                                                 class="btn btn-danger">Se désinscrire
                                         </button>
                                     </form>
                                 {% endif %}
                             {% endfor %}
+                            <form action="{{ path('page_annulation_sortie', {'id' : sortie.id}) }}"
+                                  method="post"
+                                  class="ml-2">
+                                <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
+                                <button id="annuler_sortie" type="submit"
+                                        class="btn btn-danger">Annuler
+                                </button>
+                            </form>
+
                             <a href="{{ path('page_formulaire_sortie', {'id' : sortie.id}) }}"
-                               class="btn btn-danger ml-2">Modifier</a>
+                               class="btn btn-primary ml-2">Modifier</a>
                         </div>
                     </div>
                 </div>
