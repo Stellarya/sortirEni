@@ -42,10 +42,10 @@
                                 <tbody>
                                 {% if participants is not empty and participants is not null %}
                                     {% for participant in participants %}
-                                    <tr>
-                                        <td>{{ participant.prenom }}</td>
-                                        <td>{{ participant.nom }}</td>
-                                    </tr>
+                                        <tr>
+                                            <td>{{ participant.prenom }}</td>
+                                            <td>{{ participant.nom }}</td>
+                                        </tr>
                                     {% endfor %}
                                 {% else %}
                                     <tr>
@@ -56,7 +56,7 @@
                             </table>
                         </div>
                         <p class="card-text">
-                            {% if participants|length < sortie.nbInscriptionMax %}
+                            {% if participants|length < sortie.nbInscriptionMax and date(sortie.dateLimiteInscription) > date() %}
                                 <a href="{{ path('page_inscription_sortie', {'id' : sortie.id, 'idParticipant' : app.user.id} ) }}"
                                    class="btn btn-secondary">S'inscrire</a>
                             {% endif %}

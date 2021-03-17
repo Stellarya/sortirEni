@@ -45,7 +45,9 @@ class SortieType extends AbstractType
                     'attr' => [
                         'class' => 'textarea-big',
                     ],
-                ])
+                ]);
+        $this->addLieu($builder);
+        $builder
             ->add(
                 'enregistrer',
                 SubmitType::class,
@@ -66,7 +68,6 @@ class SortieType extends AbstractType
                     ],
                 ]
             );
-        $this->addLieu($builder);
     }
 
     public function configureOptions(OptionsResolver $resolver)
