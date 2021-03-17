@@ -11,6 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
@@ -27,48 +28,59 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @Route("/admin/register", name="admin_register")
+     * @Route("/admin/users/{id<\d+>?0}", name="admin_users")
      * @param Request $request
      * @param UserPasswordEncoderInterface $passwordEncoder
+     * @param int $id
      * @return Response
      */
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
+    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, int $id): Response
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
-
-        // 1) build the form
+        $entityManager = $this->getDoctrine()->getManager();
+        $user = new User();
         $participant = new Participant();
-        $form = $this->createForm(RegisterType::class, $participant);
+        $form = $this->createForm(RegisterType::class);
+        $participantForm = $form->get("participant");
+        $userForm = $form->get("user");
 
-        // 2) handle the submit (will only happen on POST)
+        // si on a un id dans l'url on charge cet user pour pouvoir l'éditer, sinon on en créera un nouveau
+        if ($id > 0) {
+            $userRepo = $entityManager->getRepository(User::class);
+            /** @var User $user */
+            $user = $userRepo->find($id);
+            if (!$user) {
+                throw new NotFoundHttpException("Utilisateur non trouvé");
+            }
+            /** @var Participant $participant */
+            $participant = $user->getParticipant();
+            $userForm->remove("password");
+        }
+
+        $participantForm->remove("estInscrit");
+        $userForm->remove("roles");
+        $userForm->remove("old_password");
+        $userForm->remove("new_password");
+        $participantForm->setData($participant);
+        $userForm->setData($user);
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $this->getDoctrine()->getConnection()->beginTransaction();
 
             //save participant
             $participant->setActif(true);
-            $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($participant);
             $entityManager->flush();
 
             // save user
-            $data = $form->getData();
-            $user = new User();
-            $user->setRoles(["ROLE_USER"]);
-            $user->setUsername($form["username"]->getData());
-            $user->setPassword($form["password"]->getData());
-            $user->setEmail($form["email"]->getData());
-            // 3) Encode the password (you could also do this via Doctrine listener)
-            $password = $passwordEncoder->encodePassword($user, $user->getPassword());
-            $user->setPassword($password);
+            $user->setRoles($user->getRoles());
+            $user->setPassword($passwordEncoder->encodePassword($user, $user->getPassword()));
             $user->setParticipant($participant);
             $entityManager->persist($user);
             $entityManager->flush();
 
             $this->getDoctrine()->getConnection()->commit();
-
             $this->addFlash("success", "Utilisateur enregistré !");
         }
 
@@ -81,7 +93,7 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @Route("/admin/register_import", name="admin_register_import")
+     * @Route("/admin/users/import", name="admin_users_import")
      */
     public function register_import(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response {
         $this->denyAccessUnlessGranted("ROLE_ADMIN");

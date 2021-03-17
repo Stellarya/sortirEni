@@ -5,27 +5,36 @@
 
     <div class="container">
 
-        <div class="alert alert-dark" role="alert">
-            <h5><i class="fas fa-info"></i> Infos</h5>
-            <span>Le format du format du CSV doit être le suivant (une ligne par utilisateur, chaque élément séparé par un point virgule)</span>
-            <ul>
-                <li>Username</li>
-                <li>Password (en clair)</li>
-                <li>Email</li>
-                <li>Admin (0 ou 1)</li>
-                <li>Nom</li>
-                <li>Prénom</li>
-                <li>Téléphone</li>
-                <li>Actif (0 ou 1)</li>
-                <li>ID du site de rattachement</li>
-            </ul>
-            <span style="font-style: italic">Exemple: username;pass;toto@toto.com;0;nom;prenom;0102030405;1;2</span>
+
+        <div class="alert alert-light" role="alert" style="border: 1px solid rgba(0, 0, 0, .1);">
+
+            <div class="alert alert-dark" role="alert">
+                <h5><i class="fas fa-info"></i> Infos</h5>
+                <span>Le format du format du CSV doit être le suivant (une ligne par utilisateur, chaque élément séparé par un point virgule)</span>
+                <ul>
+                    <li>Username</li>
+                    <li>Password (en clair)</li>
+                    <li>Email</li>
+                    <li>Admin (0 ou 1)</li>
+                    <li>Nom</li>
+                    <li>Prénom</li>
+                    <li>Téléphone</li>
+                    <li>Actif (0 ou 1)</li>
+                    <li>ID du site de rattachement</li>
+                </ul>
+                <span style="font-style: italic">Exemple: username;pass;toto@toto.com;0;nom;prenom;0102030405;1;2</span>
+            </div>
+
+
+            <div>
+                {{ form_start(form) }}
+                {{ form_row(form.liste_participants) }}
+                <button type="submit" class="btn btn-primary">Enregistrer l'utilisateur</button>
+                {{ form_end(form) }}
+            </div>
         </div>
 
-        {{ form_start(form) }}
-        {{ form_row(form.liste_participants) }}
-        <button type="submit" class="btn btn-primary">Enregistrer l'utilisateur</button>
-        {{ form_end(form) }}
+
     </div>
 
 
