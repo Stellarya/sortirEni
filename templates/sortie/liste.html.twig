@@ -44,7 +44,7 @@
                                     [...]
                                 {% endif %}
                                 <br>
-                                Inscrits : x/{{ sortie.nbInscriptionMax }}
+                                Inscrits : {{ sortie.participants|length }}/{{ sortie.nbInscriptionMax }}
                                 <br>
                                 À {{ sortie.Lieu.Ville.Nom }} le {{ sortie.dateHeureDebut|date("d/m/Y") }}
                             </p>
