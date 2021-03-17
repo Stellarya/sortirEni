@@ -148,25 +148,33 @@ class SortieController extends AbstractController
     }
 
     /**
-     * @Route("/creer/sortie", name="page_creer_sortie")
+     * @Route("/sortie/{id}/formulaire", name="page_formulaire_sortie", requirements={"id": "-?\d+"})
      * @param Request $request
+     * @param int $id
      * @param EntityManagerInterface $em
+     * @param SortieRepository $sortieRepository
      * @param SiteRepository $siteRepository
-     * @param ParticipantRepository $participantRepository
      * @param EtatRepository $etatRepository
      * @param UserRepository $userRepository
      * @return Response
      */
-    public function createSortie(Request $request,
+    public function form(Request $request, int $id,
                                  EntityManagerInterface $em,
+                                 SortieRepository $sortieRepository,
                                  SiteRepository $siteRepository,
-                                 ParticipantRepository $participantRepository,
                                  EtatRepository $etatRepository,
                                  UserRepository $userRepository): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        $sortie = new Sortie();
+        if (-1 == $id) {
+            $sortie = new Sortie();
+            $title = 'Créer une Sortie';
+        } else {
+            $sortie = $sortieRepository->find($id);
+            $title = 'Modifier une Sortie';
+        }
+
         $sortieForm = $this->createForm(SortieType::class, $sortie);
 
         $sortieForm->handleRequest($request);
@@ -184,14 +192,19 @@ class SortieController extends AbstractController
             $sortie->setOrganisateur($user->getParticipant());
             $em->persist($sortie);
             $em->flush();
-            $this->addFlash("success", "Sortie créée avec succès !");
+            if (-1 == $id) {
+                $this->addFlash("success", "Sortie créée avec succès !");
+            } else {
+                $this->addFlash("success", "Sortie modifiée avec succès !");
+            }
+
 
             return $this->redirectToRoute('page_sortie');
         }
 
         return $this->render('sortie/formulaire.html.twig', [
             "sortieForm" => $sortieForm->createView(),
-            "title" => "Créer une sortie"
+            "title" => $title
         ]);
     }
 
@@ -255,14 +268,6 @@ class SortieController extends AbstractController
         }
 
         return $this->redirectToRoute('page_details_sortie', array('id' => $id));
-
-    }
-
-    /**
-     * @Route("/sortie/modifier/{id}", name="page_modifier_sortie", requirements={"id": "\d+"})
-     */
-    public function modifierSortie()
-    {
 
     }
 
