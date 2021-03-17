@@ -20,7 +20,7 @@ class User implements UserInterface, \Serializable
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     private $username;
 
@@ -43,6 +43,11 @@ class User implements UserInterface, \Serializable
      * @ORM\OneToOne(targetEntity=Participant::class, cascade={"persist", "remove"})
      */
     private $participant;
+
+    /**
+     * @ORM\Column(type="string", length=1000)
+     */
+    private $avatar;
 
     public function getId(): ?int
     {
@@ -162,5 +167,29 @@ class User implements UserInterface, \Serializable
             throw new Exception("L'email de l'utilisateur n'est pas valide");
         }
     }
+
+    /**
+     * @return mixed
+     */
+    public function getAvatar()
+    {
+        return $this->avatar;
+    }
+
+    /**
+     * @param mixed $avatar
+     */
+    public function setAvatar($avatar): void
+    {
+        $this->avatar = $avatar;
+    }
+
+
+    // pour utiliser dans twig
+    public function isAdmin(): bool {
+        return in_array("ROLE_ADMIN", $this->getRoles());
+    }
+
+
 
 }

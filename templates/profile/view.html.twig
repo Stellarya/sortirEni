@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+
+{% block body %}
+    {% set participant = user.getParticipant() %}
+    {% embed './profile/_profile_card.html.twig' %}
+        {% block left_card %}
+
+        {% endblock %}
+        {% block informations %}
+            <div class="col-sm-4">
+                <p class="m-b-10 f-w-600">Pseudo</p>
+                <h6 class="text-muted f-w-400">{{ user.getUsername() }}</h6>
+            </div>
+            <div class="col-sm-4">
+                <p class="m-b-10 f-w-600">Email</p>
+                <h6 class="text-muted f-w-400">{{ user.getEmail() }}</h6>
+            </div>
+            <div class="col-sm-4">
+                <p class="m-b-10 f-w-600">Actif</p>
+                <h6 class="text-muted f-w-400">{{ (participant.getActif()) ? "Oui" : "Non" }}</h6>
+            </div>
+            <div class="col-sm-4">
+                <p class="m-b-10 f-w-600">Téléphone</p>
+                <h6 class="text-muted f-w-400">{{ participant.getTelephone() }}</h6>
+            </div>
+            <div class="col-sm-4">
+                <p class="m-b-10 f-w-600">Site</p>
+                <h6 class="text-muted f-w-400">{{ participant.getEstRattacheA().getNom() }}</h6>
+            </div>
+            <div class="col-sm-4">
+                <p class="m-b-10 f-w-600">Nombre d'inscriptions</p>
+                <h6 class="text-muted f-w-400">0</h6>
+            </div>
+        {% endblock %}
+        {% block actions %}
+            {% if (app.user.getId() is same as(user.getId())) %}
+                <div class="col-sm-4">
+                    <a href="{{ path("profile_edit") }}"><button type="button" class="btn btn-light">Editer mon profil</button></a>
+                </div>
+            {% elseif (app.user.isAdmin()) %}
+                <div class="col-sm-4">
+                    <button type="button" class="btn btn-danger">Editer ce profil</button>
+                </div>
+            {% else %}
+                <div class="col-sm-4">
+                    <h6 class="text-muted f-w-400">Aucune action disponible.</h6>
+                </div>
+            {% endif %}
+        {% endblock %}
+    {% endembed %}
+{% endblock %}

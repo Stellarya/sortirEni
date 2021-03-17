@@ -44,7 +44,7 @@
                                     [...]
                                 {% endif %}
                                 <br>
-                                Inscrits : x/{{ sortie.nbInscriptionMax }}
+                                Inscrits : {{ sortie.participants|length }}/{{ sortie.nbInscriptionMax }}
                                 <br>
                                 À {{ sortie.Lieu.Ville.Nom }} le {{ sortie.dateHeureDebut|date("d/m/Y") }}
                             </p>
@@ -112,6 +112,6 @@
             </form>
         </ul>
         <br>
-        <a href="{{ path('page_creer_sortie') }}" class="btn btn-primary">Créer une nouvelle sortie</a>
+        <a href="{{ path('page_formulaire_sortie', {'id' : -1}) }}" class="btn btn-primary">Créer une nouvelle sortie</a>
     </div>
 {% endblock %}

@@ -18,10 +18,14 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+
 
 class SortieController extends AbstractController
 {
@@ -89,9 +93,9 @@ class SortieController extends AbstractController
             $estSortiePassee = $data["estSortiePassee"];
             $dateJour = null;
             $this->siteID = $data["site"]->getId();
-            if($txtRecherche || $dateDebut || $dateFin || $estOrganisateur || $estInscrit || $estPasInscrit || $estSortiePassee)
-            {
+            if ($txtRecherche || $dateDebut || $dateFin || $estOrganisateur || $estInscrit || $estPasInscrit || $estSortiePassee) {
                 $sorties = [];
+
 
                 $sorties = $this->GestionFiltres(
                     $txtRecherche,
@@ -112,14 +116,12 @@ class SortieController extends AbstractController
 
             } else
             {
-
                     $sorties = [];
                     $sortiesConcernees = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
                     $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
                     $session->set('nbSorties', count($sorties));
                     $firstResult = ($pageNumber - 1) * $maxResults;
                     $sorties = array_slice($sorties, $firstResult, $maxResults);
-
             }
             list($nbPage, $pagesAafficher) = $this->getInfosPourPagination($sortieRepository, $maxResults, $pageNumber, $session);
         }
@@ -163,25 +165,33 @@ class SortieController extends AbstractController
     }
 
     /**
-     * @Route("/creer/sortie", name="page_creer_sortie")
+     * @Route("/sortie/{id}/formulaire", name="page_formulaire_sortie", requirements={"id": "-?\d+"})
      * @param Request $request
+     * @param int $id
      * @param EntityManagerInterface $em
+     * @param SortieRepository $sortieRepository
      * @param SiteRepository $siteRepository
-     * @param ParticipantRepository $participantRepository
      * @param EtatRepository $etatRepository
      * @param UserRepository $userRepository
      * @return Response
      */
-    public function createSortie(Request $request,
+    public function form(Request $request, int $id,
                                  EntityManagerInterface $em,
+                                 SortieRepository $sortieRepository,
                                  SiteRepository $siteRepository,
-                                 ParticipantRepository $participantRepository,
                                  EtatRepository $etatRepository,
                                  UserRepository $userRepository): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        $sortie = new Sortie();
+        if (-1 == $id) {
+            $sortie = new Sortie();
+            $title = 'Créer une Sortie';
+        } else {
+            $sortie = $sortieRepository->find($id);
+            $title = 'Modifier une Sortie';
+        }
+
         $sortieForm = $this->createForm(SortieType::class, $sortie);
 
         $sortieForm->handleRequest($request);
@@ -199,14 +209,19 @@ class SortieController extends AbstractController
             $sortie->setOrganisateur($user->getParticipant());
             $em->persist($sortie);
             $em->flush();
-            $this->addFlash("success", "Sortie créée avec succès !");
+            if (-1 == $id) {
+                $this->addFlash("success", "Sortie créée avec succès !");
+            } else {
+                $this->addFlash("success", "Sortie modifiée avec succès !");
+            }
+
 
             return $this->redirectToRoute('page_sortie');
         }
 
         return $this->render('sortie/formulaire.html.twig', [
             "sortieForm" => $sortieForm->createView(),
-            "title" => "Créer une sortie"
+            "title" => $title
         ]);
     }
 
@@ -224,8 +239,10 @@ class SortieController extends AbstractController
 
         $dateHeure = $sortie->getDateHeureDebut()->getTimestamp();
         $dateLimiteInscription = $sortie->getDateLimiteInscription()->getTimestamp();
-        $latitude = ($lieu->getLatitude()) ? : '-';
-        $longitude = ($lieu->getLongitude() ? : '-');
+        $latitude = ($lieu->getLatitude()) ?: '-';
+        $longitude = ($lieu->getLongitude() ?: '-');
+
+        $tParticipants = $sortie->getParticipants();
 
         return $this->render('sortie/details.html.twig', [
                 "sortie" => $sortie,
@@ -236,9 +253,39 @@ class SortieController extends AbstractController
                 'dateLimite' => date('d/m/Y', $dateLimiteInscription),
                 'latitude' => $latitude,
                 'longitude' => $longitude,
+                'participants' => $tParticipants
 
             ]
         );
+    }
+
+    /**
+     * @Route("/sortie/{id}/inscription//{idParticipant}", name="page_inscription_sortie", requirements={"id": "\d+","idParticipant": "\d+"})
+     * @param int $id
+     * @param int $idParticipant
+     * @param SortieRepository $sortieRepository
+     * @param ParticipantRepository $participantRepository
+     * @return RedirectResponse
+     */
+    public function inscriptionSortie(int $id, int $idParticipant,
+                                      SortieRepository $sortieRepository,
+                                      ParticipantRepository $participantRepository): RedirectResponse
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $oSortie = $sortieRepository->find($id);
+        $oParticipant = $participantRepository->find($idParticipant);
+
+        if ($oSortie && $oParticipant) {
+            $oSortie->addParticipant($oParticipant);
+            $em->persist($oSortie);
+            $em->flush();
+        } else {
+            throw $this->createNotFoundException('Erreur ! Participant introuvable.');
+        }
+
+        return $this->redirectToRoute('page_details_sortie', array('id' => $id));
+
     }
 
     /**

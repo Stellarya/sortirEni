@@ -7,6 +7,7 @@
         "php": ">=7.2.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ext-json": "*",
         "composer/package-versions-deprecated": "1.11.99.1",
         "doctrine/doctrine-bundle": "^2.2",
         "doctrine/doctrine-migrations-bundle": "^3.0",
@@ -21,6 +22,7 @@
         "symfony/form": "5.2.*",
         "symfony/framework-bundle": "5.2.*",
         "symfony/maker-bundle": "^1.29",
+        "symfony/mime": "5.2.*",
         "symfony/monolog-bundle": "^3.0",
         "symfony/proxy-manager-bridge": "5.2.*",
         "symfony/requirements-checker": "^2.0",
@@ -32,8 +34,7 @@
         "symfony/web-profiler-bundle": "5.2.*",
         "symfony/yaml": "5.2.*",
         "twig/extra-bundle": "^2.12|^3.0",
-        "twig/twig": "^2.12|^3.0",
-      "ext-json": "*"
+        "twig/twig": "^2.12|^3.0"
     },
     "config": {
         "optimize-autoloader": true,
