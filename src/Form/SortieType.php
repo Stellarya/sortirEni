@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\Lieu;
 use App\Entity\Site;
 use App\Entity\Sortie;
+use App\Repository\LieuRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -29,18 +30,9 @@ class SortieType extends AbstractType
     {
         //$token = $this->token->getToken()->getUser()->getUsername();
         $builder
-            ->add('nom',
-                TextType::class,
-                [
-                    'label' => 'Nom de la sortie '
-                ])
-            ->add('dateHeureDebut',
-                DateTimeType::class,
-                [
-                    'label' => 'Date et heure de la sortie '
-                ])
-            ->add('dateLimiteInscription',
-                DateType::class,
+            ->add('nom', TextType::class)
+            ->add('dateHeureDebut', DateTimeType::class)
+            ->add('dateLimiteInscription', DateType::class,
                 [
                     'label' => 'Date limite d\'inscription '
                 ])
@@ -53,12 +45,6 @@ class SortieType extends AbstractType
                     'attr' => [
                         'class' => 'textarea-big',
                     ],
-                ])
-            ->add('lieu',
-                EntityType::class,
-                [
-                    'class' => Lieu::class,
-                    'choice_label' => 'nom'
                 ])
             ->add(
                 'enregistrer',
@@ -79,8 +65,8 @@ class SortieType extends AbstractType
                         'class' => 'btn btn-primary',
                     ],
                 ]
-            )
-        ;
+            );
+        $this->addLieu($builder);
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -88,5 +74,31 @@ class SortieType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Sortie::class,
         ]);
+    }
+
+    private function addLieu(FormBuilderInterface $builder)
+    {
+        $oSortie = $builder->getData();
+        $oLieu = $oSortie->getLieu();
+        if ($oSortie->getId() != NULL && $oLieu) {
+            $builder->add('lieu', EntityType::class, array('class' => Lieu::class,
+                'query_builder' => function (LieuRepository $r) use ($oLieu) {
+                    return $r->createQueryBuilder('l')
+                        ->where('l.id=' . $oLieu->getId())
+                        ->orderBy('l.nom');
+                },
+                'choice_label' => function ($lieu) {
+                    return $lieu->getNom() . ' ('. $lieu->getVille()->getNom() . ')' ;
+                }));
+        } else {
+            $builder->add('lieu', EntityType::class, array('class' => Lieu::class,
+                'query_builder' => function (LieuRepository $r) {
+                    return $r->createQueryBuilder('l')
+                        ->orderBy('l.nom');
+                },
+                'choice_label' => function ($lieu) {
+                    return $lieu->getNom() . ' ('. $lieu->getVille()->getNom() . ')';
+                }));
+        }
     }
 }
