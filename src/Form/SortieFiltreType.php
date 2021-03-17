@@ -33,12 +33,14 @@ class SortieFiltreType extends AbstractType
                 DateType::class,
                 [
                     'label' => 'Entre ',
+                    'widget' => 'single_text',
                     'required' => false
                 ])
             ->add('dateFin',
                 DateType::class,
                 [
-                    'label' => 'et ',
+                    'label' => 'Et ',
+                    'widget' => 'single_text',
                     'required' => false
                 ])
             ->add('estOrganisateur',

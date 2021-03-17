@@ -62,13 +62,20 @@ class SortieController extends AbstractController
         }
         $maxResults = $session->get("maxResult");
 
-        $participantConnecte = $userRepository->findOneBy(
-            ["username" => $this->getUser()->getUsername()]
-        )->getParticipant();
-        $this->siteID = $participantConnecte->getEstRattacheA()->getId();
-        $sorties = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
-        list($nbPage, $pagesAafficher) = $this->getInfosPourPagination($sortieRepository, $maxResults, $pageNumber, $session);
-
+        $dataFromSession = $session->get('data');
+        if(isset($dataFromSession)) {
+            $participantConnecte = $userRepository->findOneBy(
+                ["username" => $this->getUser()->getUsername()]
+            )->getParticipant();
+            $this->siteID = $participantConnecte->getEstRattacheA()->getId();
+            $sorties = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
+            list($nbPage, $pagesAafficher) = $this->getInfosPourPagination(
+                $sortieRepository,
+                $maxResults,
+                $pageNumber,
+                $session
+            );
+        }
         $dataFromSession = $session->get('data');
 
 

@@ -31,9 +31,14 @@ class SortieType extends AbstractType
         //$token = $this->token->getToken()->getUser()->getUsername();
         $builder
             ->add('nom', TextType::class)
-            ->add('dateHeureDebut', DateTimeType::class)
+            ->add('dateHeureDebut', DateTimeType::class,
+                [
+                    'widget' => 'single_text',
+                    'label' => 'Date de début '
+                ])
             ->add('dateLimiteInscription', DateType::class,
                 [
+                    'widget' => 'single_text',
                     'label' => 'Date limite d\'inscription '
                 ])
             ->add('duree')
