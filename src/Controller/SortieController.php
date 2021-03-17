@@ -62,20 +62,18 @@ class SortieController extends AbstractController
         }
         $maxResults = $session->get("maxResult");
 
-        $dataFromSession = $session->get('data');
-        if(isset($dataFromSession)) {
-            $participantConnecte = $userRepository->findOneBy(
-                ["username" => $this->getUser()->getUsername()]
-            )->getParticipant();
-            $this->siteID = $participantConnecte->getEstRattacheA()->getId();
-            $sorties = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
-            list($nbPage, $pagesAafficher) = $this->getInfosPourPagination(
-                $sortieRepository,
-                $maxResults,
-                $pageNumber,
-                $session
-            );
-        }
+        $participantConnecte = $userRepository->findOneBy(
+            ["username" => $this->getUser()->getUsername()]
+        )->getParticipant();
+        $this->siteID = $participantConnecte->getEstRattacheA()->getId();
+        $sorties = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
+        list($nbPage, $pagesAafficher) = $this->getInfosPourPagination(
+            $sortieRepository,
+            $maxResults,
+            $pageNumber,
+            $session
+        );
+
         $dataFromSession = $session->get('data');
 
 
@@ -271,6 +269,7 @@ class SortieController extends AbstractController
      * @param Request $request
      * @param SortieRepository $sortieRepository
      * @param ParticipantRepository $participantRepository
+     * @param int $id
      * @return RedirectResponse
      */
     public function inscriptionSortie(Request $request,
