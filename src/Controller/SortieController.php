@@ -243,18 +243,20 @@ class SortieController extends AbstractController
     }
 
     /**
-     * @Route("/sortie/{id}/inscription//{idParticipant}", name="page_inscription_sortie", requirements={"id": "\d+","idParticipant": "\d+"})
-     * @param int $id
-     * @param int $idParticipant
+     * @Route("/sortie/inscription", name="page_inscription_sortie")
+     * @param Request $request
      * @param SortieRepository $sortieRepository
      * @param ParticipantRepository $participantRepository
      * @return RedirectResponse
      */
-    public function inscriptionSortie(int $id, int $idParticipant,
+    public function inscriptionSortie(Request $request,
                                       SortieRepository $sortieRepository,
                                       ParticipantRepository $participantRepository): RedirectResponse
     {
         $em = $this->getDoctrine()->getManager();
+        $id = $request->get('id');
+        $idParticipant = $request->get('idParticipant');
+        dump($idParticipant);
 
         $oSortie = $sortieRepository->find($id);
         $oParticipant = $participantRepository->find($idParticipant);
@@ -268,6 +270,7 @@ class SortieController extends AbstractController
         }
 
         return $this->redirectToRoute('page_details_sortie', array('id' => $id));
+
 
     }
 
