@@ -267,7 +267,7 @@ class SortieController extends AbstractController
     }
 
     /**
-     * @Route("/sortie/inscription", name="page_inscription_sortie")
+     * @Route("/sortie/inscription/{id}", name="page_inscription_sortie")
      * @param Request $request
      * @param SortieRepository $sortieRepository
      * @param ParticipantRepository $participantRepository
@@ -275,22 +275,22 @@ class SortieController extends AbstractController
      */
     public function inscriptionSortie(Request $request,
                                       SortieRepository $sortieRepository,
-                                      ParticipantRepository $participantRepository): RedirectResponse
+                                      ParticipantRepository $participantRepository,
+                                        int $id): RedirectResponse
     {
         $em = $this->getDoctrine()->getManager();
-        $id = $request->get('id');
-        $idParticipant = $request->get('idParticipant');
-        dump($idParticipant);
 
-        $oSortie = $sortieRepository->find($id);
-        $oParticipant = $participantRepository->find($idParticipant);
-
-        if ($oSortie && $oParticipant) {
-            $oSortie->addParticipant($oParticipant);
-            $em->persist($oSortie);
-            $em->flush();
-        } else {
-            throw $this->createNotFoundException('Erreur ! Participant introuvable.');
+        if($request->getMethod() === 'POST'){
+            $idParticipant = $request->get('idParticipant');
+            $oSortie = $sortieRepository->find($id);
+            $oParticipant = $participantRepository->find($idParticipant);
+            if ($oSortie && $oParticipant) {
+                $oSortie->addParticipant($oParticipant);
+                $em->persist($oSortie);
+                $em->flush();
+            } else {
+                throw $this->createNotFoundException('Erreur ! Participant introuvable.');
+            }
         }
 
         return $this->redirectToRoute('page_details_sortie', array('id' => $id));
