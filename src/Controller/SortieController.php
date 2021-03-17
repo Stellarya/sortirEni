@@ -17,13 +17,17 @@ use App\Repository\UserRepository;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\Json;
 
 class SortieController extends AbstractController
 {
     public $siteID = null;
+
     /**
      * @Route("/sortie", name="page_sortie")
      * @param Request $request
@@ -52,37 +56,31 @@ class SortieController extends AbstractController
             $estSortiePassee = $data["estSortiePassee"];
             $dateJour = null;
             $this->siteID = $data["site"]->getId();
-            if($txtRecherche || $dateDebut || $dateFin || $estOrganisateur || $estInscrit || $estPasInscrit || $estSortiePassee)
-            {
+            if ($txtRecherche || $dateDebut || $dateFin || $estOrganisateur || $estInscrit || $estPasInscrit || $estSortiePassee) {
                 $sorties = [];
 
-                if($txtRecherche)
-                {
+                if ($txtRecherche) {
                     $texte = $data["nom_recherche"];
                     $sortiesConcernees = $sortieRepository->findSortiesParTexte($texte);
                     $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
                 }
 
-                if($dateDebut && $dateFin)
-                {
+                if ($dateDebut && $dateFin) {
                     $dateD = $data["dateDebut"];
                     $dateF = $data["dateFin"];
                     $sortiesConcernees = $sortieRepository->findSortiesEntreDeuxDates($dateD, $dateF);
                     $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
-                } elseif ($dateDebut)
-                {
+                } elseif ($dateDebut) {
                     $dateD = $data["dateDebut"];
                     $sortiesConcernees = $sortieRepository->findSortiesApresUneDate($dateD);
                     $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
-                } elseif ($dateFin)
-                {
+                } elseif ($dateFin) {
                     $dateF = $data["dateFin"];
                     $sortiesConcernees = $sortieRepository->findSortiesAvantUneDate($dateF);
                     $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
                 }
 
-                if ($estOrganisateur || $estInscrit || $estPasInscrit)
-                {
+                if ($estOrganisateur || $estInscrit || $estPasInscrit) {
                     $participantConnecte = $userRepository->findOneBy(["username" => $this->getUser()->getUsername()]
                     )->getParticipant();
                     $participantID = $participantConnecte->getID();
@@ -100,17 +98,15 @@ class SortieController extends AbstractController
                     }
                 }
 
-                if($estSortiePassee)
-                {
+                if ($estSortiePassee) {
                     $dateJour = new DateTime('NOW');
                     $date = date_format($dateJour, "Y-m-d G:i:s");
                     $sortiesConcernees = $sortieRepository->findSortiesParDatePassee($date);
                     $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
                 }
 
-            } else
-            {
-                if($this->siteID == $data["site"]->getId()) {
+            } else {
+                if ($this->siteID == $data["site"]->getId()) {
                     $sorties = [];
                     $sortiesConcernees = $sortieRepository->findSortiesParSite($this->siteID);
                     $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
@@ -119,7 +115,7 @@ class SortieController extends AbstractController
 
         }
 
-        usort($sorties, function($a, $b) {
+        usort($sorties, function ($a, $b) {
             $ad = $a->getDateHeureDebut();
             $bd = $b->getDateHeureDebut();
 
@@ -213,8 +209,10 @@ class SortieController extends AbstractController
 
         $dateHeure = $sortie->getDateHeureDebut()->getTimestamp();
         $dateLimiteInscription = $sortie->getDateLimiteInscription()->getTimestamp();
-        $latitude = ($lieu->getLatitude()) ? : '-';
-        $longitude = ($lieu->getLongitude() ? : '-');
+        $latitude = ($lieu->getLatitude()) ?: '-';
+        $longitude = ($lieu->getLongitude() ?: '-');
+
+        $tParticipants = $sortie->getParticipants();
 
         return $this->render('sortie/details.html.twig', [
                 "sortie" => $sortie,
@@ -225,12 +223,50 @@ class SortieController extends AbstractController
                 'dateLimite' => date('d/m/Y', $dateLimiteInscription),
                 'latitude' => $latitude,
                 'longitude' => $longitude,
+                'participants' => $tParticipants
 
             ]
         );
     }
 
-    function array_sort($array, $on, $order=SORT_ASC)
+    /**
+     * @Route("/sortie/{id}/inscription//{idParticipant}", name="page_inscription_sortie", requirements={"id": "\d+","idParticipant": "\d+"})
+     * @param int $id
+     * @param int $idParticipant
+     * @param SortieRepository $sortieRepository
+     * @param ParticipantRepository $participantRepository
+     * @return RedirectResponse
+     */
+    public function inscriptionSortie(int $id, int $idParticipant,
+                                      SortieRepository $sortieRepository,
+                                      ParticipantRepository $participantRepository): RedirectResponse
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $oSortie = $sortieRepository->find($id);
+        $oParticipant = $participantRepository->find($idParticipant);
+
+        if ($oSortie && $oParticipant) {
+            $oSortie->addParticipant($oParticipant);
+            $em->persist($oSortie);
+            $em->flush();
+        } else {
+            throw $this->createNotFoundException('Erreur ! Participant introuvable.');
+        }
+
+        return $this->redirectToRoute('page_details_sortie', array('id' => $id));
+
+    }
+
+    /**
+     * @Route("/sortie/modifier/{id}", name="page_modifier_sortie", requirements={"id": "\d+"})
+     */
+    public function modifierSortie()
+    {
+
+    }
+
+    function array_sort($array, $on, $order = SORT_ASC)
     {
         $new_array = array();
         $sortable_array = array();
