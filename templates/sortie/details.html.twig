@@ -1,7 +1,7 @@
 {% extends('base.html.twig') %}
 {% block body %}
     <div class="container-fluid">
-        <a href="{{ path('page_sortie', {'id' : sortie.id}) }}"
+        <a href="{{ path('page_sortie') }}"
            class="btn btn-primary m-2">Retourner à la liste des sorties</a>
         <div class="card mb-3 mt-5">
             <div class="row g-0">
@@ -92,7 +92,8 @@
                                     </form>
                                 {% endif %}
                             {% endfor %}
-                            {% if app.user.participant.id == sortie.organisateur.id and date(sortie.dateHeureDebut) > date()%}
+                            {% if (app.user.participant.id == sortie.organisateur.id
+                                or "ROLE_ADMIN" in app.user.roles) and date(sortie.dateHeureDebut) > date()%}
                                 <form action="{{ path('page_annulation_sortie', {'id' : sortie.id}) }}"
                                       method="post"
                                       class="ml-2">
