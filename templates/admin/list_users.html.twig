@@ -4,34 +4,32 @@
 {% block body %}
 
 
-    <div class="container">
-        <div class="alert alert-light" style="border: 1px solid rgba(0, 0, 0, .1);">
-            <table id="datatable_users">
-                <thead>
+    <div class="alert alert-light sortir-box">
+        <table id="datatable_users">
+            <thead>
+            <tr>
+                <th>Pseudo</th>
+                <th>Prénom</th>
+                <th>Nom</th>
+                <th>Actif</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in list_users %}
                 <tr>
-                    <th>Pseudo</th>
-                    <th>Prénom</th>
-                    <th>Nom</th>
-                    <th>Actif</th>
-                    <th>Action</th>
+                    <td><a href="{{ path('admin_users', {'id': user.getId()}) }}">{{ user.getUsername() }}</a></td>
+                    <td>{{ user.getParticipant().getPrenom() }}</td>
+                    <td>{{ user.getParticipant().getNom() }}</td>
+                    <td>{{ (user.getParticipant().getActif()) ? "Oui" : "Non" }}</td>
+                    <td>
+                        <button type="button" class="btn btn-info btn_actif" data-id="{{ user.getId() }}">{{ (user.getParticipant().getActif()) ? "Rendre inactif" : "Rendre actif" }}</button>
+                        <button type="button" class="btn btn-danger btn_supprimer" data-id="{{ user.getId() }}">Supprimer</button>
+                    </td>
                 </tr>
-                </thead>
-                <tbody>
-                {% for user in list_users %}
-                    <tr>
-                        <td><a href="{{ path('admin_users', {'id': user.getId()}) }}">{{ user.getUsername() }}</a></td>
-                        <td>{{ user.getParticipant().getPrenom() }}</td>
-                        <td>{{ user.getParticipant().getNom() }}</td>
-                        <td>{{ (user.getParticipant().getActif()) ? "Oui" : "Non" }}</td>
-                        <td>
-                            <button type="button" class="btn btn-info btn_actif" data-id="{{ user.getId() }}">{{ (user.getParticipant().getActif()) ? "Rendre inactif" : "Rendre actif" }}</button>
-                            <button type="button" class="btn btn-danger btn_supprimer" data-id="{{ user.getId() }}">Supprimer</button>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
 
 
