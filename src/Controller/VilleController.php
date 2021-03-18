@@ -82,13 +82,11 @@ class VilleController extends AbstractController
     public function delete(Request $request, int $id): JsonResponse
     {
         try {
-            $this->getDoctrine()->getConnection()->beginTransaction();
             $em = $this->getDoctrine()->getManager();
             $oVille = $em->find(Ville::class, $id);
 
             $em->remove($oVille);
             $em->flush();
-            $this->getDoctrine()->getConnection()->rollback();
             return new JsonResponse([
                 "is_ok" => true,
                 "message" => "Ville supprimée avec succès"
