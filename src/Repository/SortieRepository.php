@@ -104,7 +104,7 @@ class SortieRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('s');
         $qb->where($qb->expr()->like('s.nom', '?1'))
             ->join('s.etat', 'e')
-            ->where($qb->expr()->eq('e.libelle', '?2'))
+            ->andWhere($qb->expr()->eq('e.libelle', '?2'))
             ->orWhere($qb->expr()->eq('e.libelle', '?3'))
             ->addCriteria($this->criteria)
              ;
