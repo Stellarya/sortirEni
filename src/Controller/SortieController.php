@@ -2,11 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Etat;
-use App\Entity\Participant;
-use App\Entity\Site;
 use App\Entity\Sortie;
-use App\Entity\User;
 use App\Form\SortieFiltreType;
 use App\Form\SortieType;
 use App\Repository\EtatRepository;
@@ -23,7 +19,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Constraints\Json;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 
@@ -42,22 +37,22 @@ class SortieController extends AbstractController
      * @throws QueryException
      */
     public function liste(Request $request,
-        SortieRepository $sortieRepository,
-        UserRepository $userRepository,
-        SessionInterface $session,
-        int $pageNumber = 1): Response
+                          SortieRepository $sortieRepository,
+                          UserRepository $userRepository,
+                          SessionInterface $session,
+                          int $pageNumber = 1): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         $maxResults = $session->get("maxResult");
-        if(!isset($maxResults)){
+        if (!isset($maxResults)) {
             $session->set("maxResult", 12);
         }
 
-        if($request->getMethod() === 'POST'){
+        if ($request->getMethod() === 'POST') {
             $data = $request->get('ideaPerPage');
         }
-        if(isset($data) && $data > 0) {
+        if (isset($data) && $data > 0) {
             $session->set("maxResult", $data);
         }
         $maxResults = $session->get("maxResult");
@@ -75,17 +70,29 @@ class SortieController extends AbstractController
         );
 
         $dataFromSession = $session->get('data');
+        if (isset($dataFromSession)) {
+            $participantConnecte = $userRepository->findOneBy(
+                ["username" => $this->getUser()->getUsername()]
+            )->getParticipant();
+            $this->siteID = $participantConnecte->getEstRattacheA()->getId();
+            $sorties = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
+            list($nbPage, $pagesAafficher) = $this->getInfosPourPagination(
+                $sortieRepository,
+                $maxResults,
+                $pageNumber,
+                $session
+            );
+        }
 
+        $dataFromSession = $session->get('data');
 
         $form = $this->createForm(SortieFiltreType::class);
         $form->handleRequest($request);
         if (($form->isSubmitted() && $form->isValid()) || isset($dataFromSession)) {
             $data = $form->getData();
-            if(!isset($data))
-            {
+            if (!isset($data)) {
                 $data = $dataFromSession;
-            } else
-            {
+            } else {
                 $pageNumber = 1;
             }
             $session->set('data', $data);
@@ -100,8 +107,6 @@ class SortieController extends AbstractController
             $this->siteID = $data["site"]->getId();
             if ($txtRecherche || $dateDebut || $dateFin || $estOrganisateur || $estInscrit || $estPasInscrit || $estSortiePassee) {
                 $sorties = [];
-
-
                 $sorties = $this->GestionFiltres(
                     $txtRecherche,
                     $data,
@@ -119,14 +124,13 @@ class SortieController extends AbstractController
                     $session
                 );
 
-            } else
-            {
-                    $sorties = [];
-                    $sortiesConcernees = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
-                    $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
-                    $session->set('nbSorties', count($sorties));
-                    $firstResult = ($pageNumber - 1) * $maxResults;
-                    $sorties = array_slice($sorties, $firstResult, $maxResults);
+            } else {
+                $sorties = [];
+                $sortiesConcernees = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
+                $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
+                $session->set('nbSorties', count($sorties));
+                $firstResult = ($pageNumber - 1) * $maxResults;
+                $sorties = array_slice($sorties, $firstResult, $maxResults);
             }
             list($nbPage, $pagesAafficher) = $this->getInfosPourPagination($sortieRepository, $maxResults, $pageNumber, $session);
         }
@@ -141,8 +145,8 @@ class SortieController extends AbstractController
                     'ideaCountPage' => $nbPage,
                     'pageNumber' => $pageNumber,
                     'pagesToDisplay' => $pagesAafficher,
-                    'firstEllipsis' => $pageNumber-2,
-                    'secondEllipsis' => $pageNumber+3,
+                    'firstEllipsis' => $pageNumber - 2,
+                    'secondEllipsis' => $pageNumber + 3,
                     'maxResults' => $maxResults,
                     'form' => $form->createView(),
                     'title' => "Liste des sorties"
@@ -181,11 +185,11 @@ class SortieController extends AbstractController
      * @return Response
      */
     public function form(Request $request, int $id,
-                                 EntityManagerInterface $em,
-                                 SortieRepository $sortieRepository,
-                                 SiteRepository $siteRepository,
-                                 EtatRepository $etatRepository,
-                                 UserRepository $userRepository): Response
+                         EntityManagerInterface $em,
+                         SortieRepository $sortieRepository,
+                         SiteRepository $siteRepository,
+                         EtatRepository $etatRepository,
+                         UserRepository $userRepository): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
@@ -236,11 +240,13 @@ class SortieController extends AbstractController
      * @param int|null $id
      * @return Response
      */
-    public function detailSortie(SortieRepository $sortieRepository, int $id = null): Response
+    public function detailSortie(SortieRepository $sortieRepository, ParticipantRepository $participantRepository, int $id = null): Response
     {
         $sortie = $sortieRepository->find($id);
         $nom = $sortie->getNom();
         $lieu = $sortie->getLieu();
+        $participants = $participantRepository->findParticipantsBySortie($sortie);
+        dump($participants);
 
         $dateHeure = $sortie->getDateHeureDebut()->getTimestamp();
         $dateLimiteInscription = $sortie->getDateLimiteInscription()->getTimestamp();
@@ -258,7 +264,8 @@ class SortieController extends AbstractController
                 'dateLimite' => date('d/m/Y', $dateLimiteInscription),
                 'latitude' => $latitude,
                 'longitude' => $longitude,
-                'participants' => $tParticipants
+                'participants' => $tParticipants,
+                'tIdParticipants' => $participants,
 
             ]
         );
@@ -275,11 +282,11 @@ class SortieController extends AbstractController
     public function inscriptionSortie(Request $request,
                                       SortieRepository $sortieRepository,
                                       ParticipantRepository $participantRepository,
-                                        int $id): RedirectResponse
+                                      int $id): RedirectResponse
     {
         $em = $this->getDoctrine()->getManager();
 
-        if($request->getMethod() === 'POST'){
+        if ($request->getMethod() === 'POST') {
             $idParticipant = $request->get('idParticipant');
             $oSortie = $sortieRepository->find($id);
             $oParticipant = $participantRepository->find($idParticipant);
@@ -293,7 +300,59 @@ class SortieController extends AbstractController
         }
 
         return $this->redirectToRoute('page_details_sortie', array('id' => $id));
+    }
 
+    /**
+     * @Route("/sortie/desinscription/{id}", name="page_desinscription_sortie")
+     * @param Request $request
+     * @param SortieRepository $sortieRepository
+     * @param ParticipantRepository $participantRepository
+     * @return RedirectResponse
+     */
+    public function desinscriptionSortie(Request $request,
+                                         SortieRepository $sortieRepository,
+                                         ParticipantRepository $participantRepository,
+                                         int $id): RedirectResponse
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        if ($request->getMethod() === 'POST') {
+            $idParticipant = $request->get('idParticipant');
+            $oSortie = $sortieRepository->find($id);
+            $oParticipant = $participantRepository->find($idParticipant);
+            if ($oSortie && $oParticipant) {
+                $oSortie->removeParticipant($oParticipant);
+                $em->persist($oSortie);
+                $em->flush();
+            } else {
+                throw $this->createNotFoundException('Erreur ! Participant introuvable.');
+            }
+        }
+
+        return $this->redirectToRoute('page_details_sortie', array('id' => $id));
+    }
+
+    /**
+     * @Route("/sortie/annulation/{id}", name="page_annulation_sortie")
+     * @param SortieRepository $sortieRepository
+     * @param int $id
+     * @return JsonResponse|RedirectResponse
+     */
+    public function annulationSortie(SortieRepository $sortieRepository,
+                                     int $id)
+    {
+        $oSortie = $sortieRepository->find($id);
+        if ($oSortie) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($oSortie);
+            $em->flush();
+
+            return $this->redirectToRoute('page_sortie');
+        } else {
+            return new JsonResponse([
+                'errorMessage' => 'Erreur ! La sortie à supprimer n\'existe pas.'
+            ]);
+        }
 
     }
 
@@ -315,22 +374,21 @@ class SortieController extends AbstractController
      * @return array
      * @throws QueryException
      */
-    public function GestionFiltres(
-        bool $txtRecherche,
-        $data,
-        SortieRepository $sortieRepository,
-        array $sorties,
-        bool $dateDebut,
-        bool $dateFin,
-        $estOrganisateur,
-        $estInscrit,
-        $estPasInscrit,
-        UserRepository $userRepository,
-        $estSortiePassee,
-        $maxResults,
-        $pageNumber,
-        SessionInterface $session
-    ): array {
+    public function GestionFiltres(bool $txtRecherche,
+                                   $data,
+                                   SortieRepository $sortieRepository,
+                                   array $sorties,
+                                   bool $dateDebut,
+                                   bool $dateFin,
+                                   $estOrganisateur,
+                                   $estInscrit,
+                                   $estPasInscrit,
+                                   UserRepository $userRepository,
+                                   $estSortiePassee,
+                                   $maxResults,
+                                   $pageNumber,
+                                   SessionInterface $session): array
+    {
         if ($txtRecherche) {
             $texte = $data["nom_recherche"];
             $sortiesConcernees = $sortieRepository->findSortiesParTexte($texte);
@@ -417,12 +475,12 @@ class SortieController extends AbstractController
      * @return array
      */
     public function getInfosPourPagination(SortieRepository $sortieRepository,
-        int $maxResults,
-        int $pageNumber,
-        SessionInterface $session): array
+                                           int $maxResults,
+                                           int $pageNumber,
+                                           SessionInterface $session): array
     {
         $nbSortiesSession = $session->get('nbSorties');
-        if(isset($nbSortiesSession)) {
+        if (isset($nbSortiesSession)) {
             $nbSorties = $nbSortiesSession;
             $session->remove('nbSorties');
         } else {
@@ -431,7 +489,7 @@ class SortieController extends AbstractController
 
         $nbPage = ceil($nbSorties / $maxResults);
         $pagesAafficher = array($pageNumber - 1, $pageNumber + 1, $pageNumber + 2);
-        if($nbPage == 0)
+        if ($nbPage == 0)
             $nbPage = 1;
         return array($nbPage, $pagesAafficher);
     }

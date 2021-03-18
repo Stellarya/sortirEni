@@ -70,10 +70,7 @@ class SortieRepository extends ServiceEntityRepository
 
     /**
      * @param $id
-     * @param $resultatsMax
-     * @param $numPage
      * @return Sortie[] Returns an array of Sortie objects
-     * @throws QueryException
      */
     public function findSortiesByOrganisateur($id): array
     {
