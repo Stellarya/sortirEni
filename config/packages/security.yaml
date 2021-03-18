@@ -21,7 +21,7 @@ security:
                     - App\Security\LoginFormAuthenticator
             logout:
                 path: app_logout
-                target: accueil_index
+                target: app_login
             remember_me:
                 secret:   '%kernel.secret%'
                 token_provider: 'Symfony\Bridge\Doctrine\Security\RememberMe\DoctrineTokenProvider'
