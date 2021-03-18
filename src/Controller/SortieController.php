@@ -61,28 +61,13 @@ class SortieController extends AbstractController
             ["username" => $this->getUser()->getUsername()]
         )->getParticipant();
         $this->siteID = $participantConnecte->getEstRattacheA()->getId();
-        $sorties = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
+        $sorties = $sortieRepository->findSortiesParSite($this->siteID);
         list($nbPage, $pagesAafficher) = $this->getInfosPourPagination(
             $sortieRepository,
             $maxResults,
             $pageNumber,
             $session
         );
-
-        $dataFromSession = $session->get('data');
-        if (isset($dataFromSession)) {
-            $participantConnecte = $userRepository->findOneBy(
-                ["username" => $this->getUser()->getUsername()]
-            )->getParticipant();
-            $this->siteID = $participantConnecte->getEstRattacheA()->getId();
-            $sorties = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
-            list($nbPage, $pagesAafficher) = $this->getInfosPourPagination(
-                $sortieRepository,
-                $maxResults,
-                $pageNumber,
-                $session
-            );
-        }
 
         $dataFromSession = $session->get('data');
 
@@ -126,7 +111,7 @@ class SortieController extends AbstractController
 
             } else {
                 $sorties = [];
-                $sortiesConcernees = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
+                $sortiesConcernees = $sortieRepository->findSortiesParSite($this->siteID);
                 $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
                 $session->set('nbSorties', count($sorties));
                 $firstResult = ($pageNumber - 1) * $maxResults;
@@ -235,12 +220,19 @@ class SortieController extends AbstractController
     }
 
     /**
-     * @Route("/sortie/detail/{id}", name="page_details_sortie", requirements={"id": "\d+"})
+     * @Route("/sortie/detail/{id}/{pageNumber}", name="page_details_sortie", requirements={"id": "\d+"})
      * @param SortieRepository $sortieRepository
+     * @param ParticipantRepository $participantRepository
      * @param int|null $id
+     * @param int $pageNumber
      * @return Response
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function detailSortie(SortieRepository $sortieRepository, ParticipantRepository $participantRepository, int $id = null): Response
+    public function detailSortie(SortieRepository $sortieRepository,
+        ParticipantRepository $participantRepository,
+        int $id = null,
+        int $pageNumber = 1): Response
     {
         $sortie = $sortieRepository->find($id);
         $nom = $sortie->getNom();
@@ -266,7 +258,7 @@ class SortieController extends AbstractController
                 'longitude' => $longitude,
                 'participants' => $tParticipants,
                 'tIdParticipants' => $participants,
-
+                'pageNumber' => $pageNumber,
             ]
         );
     }
