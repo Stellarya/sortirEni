@@ -5,15 +5,28 @@
     <div class="container">
         <h1>{{ title }}</h1>
 
-        <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#filtres">Afficher les filtres</button>
+        <button type="button" class="btn btn-primary mb-3" data-toggle="collapse" data-target="#filtres">Afficher les filtres</button>
         <div id="filtres" class="collapse">
             {{ form_start(form) }}
             {{ form_widget(form) }}
             {{ form_end(form) }}
         </div>
 
-
-        <div class="row">
+        {% if sorties|length == 0 %}
+        <div class="row mt-3">
+            <div class="col-sm-3 d-flex align-items-stretch">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Aucune sortie</h5>
+                        <p class="card-text">
+                            Il n'y a pas de sortie sur ce site avec ces filtres
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="row mt-3">
             <!--<div class="card-columns align-items-stretch">-->
         {% for sortie in sorties %}
             <div class="col-sm-3 d-flex align-items-stretch">
@@ -31,19 +44,74 @@
                                     [...]
                                 {% endif %}
                                 <br>
-                                Inscrits : x/{{ sortie.nbInscriptionMax }}
+                                Inscrits : {{ sortie.participants|length }}/{{ sortie.nbInscriptionMax }}
                                 <br>
                                 À {{ sortie.Lieu.Ville.Nom }} le {{ sortie.dateHeureDebut|date("d/m/Y") }}
                             </p>
 
                         </div>
-                        <a href="{{ path('page_detail_sortie', {'id' : sortie.id}) }}" class="btn btn-secondary">Plus d'informations</a>
+                        <a href="{{ path('page_details_sortie', {'id' : sortie.id}) }}" class="btn btn-secondary">Plus d'informations</a>
                     </div>
             </div>
         {% endfor %}
         <!-- </div> -->
         </div>
         <br>
-        <a href="{{ path('page_creer_sortie') }}" class="btn btn-primary">Créer une nouvelle sortie</a>
+
+        <ul class="pagination d-flex justify-content-center">
+            {% if pageNumber == 1 %}
+                <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+            {% else %}
+                <li class="page-item"><a href="{{ path('page_sortie', {'pageNumber' : pageNumber-1}) }}"
+                                                   class="page-link">Previous</a></li>
+            {% endif %}
+
+            {% for i in 1..ideaCountPage %}
+                {% if i == pageNumber %}
+                    <li class="page-item active"><a class="page-link" href="{{ path('page_sortie', {'pageNumber' : i}) }}">{{ i }}</a></li>
+                {% else %}
+                    {% if (i == 1 or i == 2 or i == ideaCountPage or i == ideaCountPage - 1) %}
+                        <li class="page-item"><a href="{{ path('page_sortie', {'pageNumber' : i}) }}" class="page-link">{{ i }}</a>
+                        </li>
+                    {% elseif (i == firstEllipsis or i == secondEllipsis) %}
+                        <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
+                    {% else %}
+                        {% for page in pagesToDisplay %}
+                            {% if i == page %}
+                                <li class="page-item"><a href="{{ path('page_sortie', {'pageNumber' : i}) }}"
+                                                         class="page-link">{{ i }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+
+                {% endif %}
+            {% endfor %}
+            {% if pageNumber == ideaCountPage %}
+                <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+            {% else %}
+                <li class="page-item"><a href="{{ path('page_sortie', {'pageNumber' : pageNumber+1}) }}"
+                                         class="page-link">Next</a></li>
+            {% endif %}
+
+
+            <form action="{{ path('page_sortie', {'pageNumber' : pageNumber}) }}" method="post" class="form-inline">
+                <label>
+                    <select name="ideaPerPage" class="form-control ml-3">
+                        <option disabled value="">Select a number</option>
+                        {% for i in 1..20 %}
+                            {% if i == maxResults %}
+                                <option selected value="{{ i }}">{{ i }}</option>
+                            {% else %}
+                                <option value="{{ i }}">{{ i }}</option>
+                            {% endif %}
+                        {% endfor %}
+                        </select>
+                </label>
+                <input type="submit" class="btn btn-primary ml-3" name="Connexion" value="Appliquer">
+            </form>
+        </ul>
+        <br>
+        <a href="{{ path('page_formulaire_sortie', {'id' : -1}) }}" class="btn btn-primary">Créer une nouvelle sortie</a>
     </div>
 {% endblock %}

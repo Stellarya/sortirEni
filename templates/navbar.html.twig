@@ -1,32 +1,33 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#">
+    <a class="navbar-brand" href="{{ path('page_sortie') }}">
         <img width="150px" src="{{ asset('images/logo2.svg') }}" alt="Logo">
     </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item active mr-3">
-                <a class="nav-link" href="{{ path('accueil_index')}}"><i class="fas fa-house-user mr-2"></i>Accueil</a>
-            </li>
-            <li class="nav-item mr-3">
-                <a class="nav-link" href="{{ path('page_sortie') }}"><i class="fas fa-map-marker-alt mr-2"></i>Sorties</a>
-            </li>
+            {% if app.user %}
+                <li class="nav-item mr-3">
+                    <a class="nav-link" href="{{ path('page_sortie') }}"><i class="fas fa-map-marker-alt mr-2"></i>Sorties</a>
+                </li>
+            {% endif %}
             {% if is_granted("ROLE_ADMIN") %}
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-cog mr-2"></i>Administration
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="dropdown-item" href="#">Villes</a>
-                    <a class="dropdown-item" href="#">Sites</a>
-                    <a class="dropdown-item" href="{{ path('admin_users_list') }}">Liste des utilisateurs</a>
-                    <a class="dropdown-item" href="{{ path('admin_users') }}">Inscription utilisateur</a>
-                    <a class="dropdown-item" href="{{ path('admin_users_import') }}">Import liste utilisateur</a>
-                </div>
-            </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-cog mr-2"></i>Administration
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Villes</a>
+                        <a class="dropdown-item" href="#">Sites</a>
+                        <a class="dropdown-item" href="{{ path('admin_users_list') }}">Liste des utilisateurs</a>
+                        <a class="dropdown-item" href="{{ path('admin_users') }}">Inscription utilisateur</a>
+                        <a class="dropdown-item" href="{{ path('admin_users_import') }}">Import liste utilisateur</a>
+                    </div>
+                </li>
             {% endif %}
         </ul>
         <ul class="navbar-nav user_nav">
@@ -35,7 +36,7 @@
                     <span class="nav-link"><i class="fas fa-user"></i> {{ app.user.username }}</span>
                 </li>
                 <li class="nav-item mr-3">
-                    <a class="nav-link"  href="{{ path('profile_view') }}">Mon Profil</a>
+                    <a class="nav-link" href="{{ path('profile_view') }}">Mon Profil</a>
                 </li>
                 <li class="nav-item  mr-3">
                     <a class="nav-link" href="{{ path('app_logout') }}"><i class="fas fa-user-times mr-2"></i>Déconnexion</a>

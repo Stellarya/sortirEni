@@ -8,9 +8,9 @@
                     <div class="col-sm-2 bg-c-lite-green user-profile">
                         <div class="card-block text-center text-white">
                             {% if (user.getAvatar()|length == 0 ) %}
-                                <div class="m-b-25"> <img src="{{ asset("images/avatar_blank.png") }}" class="img-radius" alt="User-Profile-Image" height="100px"> </div>
+                                <div class="m-b-25"> <img src="{{ asset("images/avatar_blank.png") }}" class="img-radius" alt="User-Profile-Image" height="100px" width="100px"> </div>
                             {% else %}
-                                <div class="m-b-25"> <img src="{{ asset("uploads/avatars/") ~ user.getAvatar() }}" class="img-radius" alt="User-Profile-Image" height="100px"> </div>
+                                <div class="m-b-25"> <img src="{{ asset("uploads/avatars/") ~ user.getAvatar() }}" class="img-radius" alt="User-Profile-Image" height="100px" width="100px"> </div>
                             {% endif %}
                             <h6 class="f-w-600">{{ participant.getIdentite() }}</h6>
                             <p>{{ (user.isAdmin()) ? "Administrateur" : "Participant" }}</p>

@@ -13,6 +13,11 @@
             <link rel="stylesheet" href="{{ asset('lib/fontawesome/css/all.css') }}">
             <!-- jQuery 3.5.1 -->
             <script src="{{ asset('lib/jquery-3.5.1/jquery-3.5.1.min.js') }}"></script>
+            <!-- Moment.js (pour tempus dominus)-->
+            <script src="{{ asset('lib/moment/moment.js') }}"></script>
+            <!-- Tempus dominus-->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.38.0/js/tempusdominus-bootstrap-4.min.js" crossorigin="anonymous"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.38.0/css/tempusdominus-bootstrap-4.min.css" crossorigin="anonymous" />
         {% endblock %}
     </head>
     <body>
@@ -20,7 +25,9 @@
         {% include "navbar.html.twig" %}
         {% include "messages.html.twig" %}
 
+        <div class="container">
         {% block body %}{% endblock %}
+        </div>
         {% block javascripts %}
             <!-- bootstrap 4 -->
             <script src="{{ asset('lib/bootstrap-4/js/bootstrap.min.js')}}"></script>

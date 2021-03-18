@@ -1,5 +1,6 @@
 {% extends('base.html.twig') %}
 {% block body %}
+    <div class="container">
     <h2>{{ title }}</h2>
     <div>
         {{ form_start(sortieForm) }}
@@ -7,6 +8,7 @@
         <a href="{{ path('page_sortie') }}" class="btn btn-danger">Annuler</a>
         {{ form_end(sortieForm) }}
 
+    </div>
     </div>
 
 {% endblock %}
