@@ -40,7 +40,8 @@
                 </div>
             {% elseif (app.user.isAdmin()) %}
                 <div class="col-sm-4">
-                    <button type="button" class="btn btn-danger">Editer ce profil</button>
+                    <a href="{{ path("admin_users", {"id": user.getId()}) }}"><button type="button" class="btn btn-danger">Editer ce profil</button></a>
+
                 </div>
             {% else %}
                 <div class="col-sm-4">

@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+
+{% block body %}
+
+
+    <div class="alert alert-light sortir-box">
+        <table id="datatable_users">
+            <thead>
+            <tr>
+                <th>Pseudo</th>
+                <th>Prénom</th>
+                <th>Nom</th>
+                <th>Actif</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in list_users %}
+                <tr>
+                    <td><a href="{{ path('admin_users', {'id': user.getId()}) }}">{{ user.getUsername() }}</a></td>
+                    <td>{{ user.getParticipant().getPrenom() }}</td>
+                    <td>{{ user.getParticipant().getNom() }}</td>
+                    <td>{{ (user.getParticipant().getActif()) ? "Oui" : "Non" }}</td>
+                    <td>
+                        <button type="button" class="btn btn-info btn_actif" data-id="{{ user.getId() }}">{{ (user.getParticipant().getActif()) ? "Rendre inactif" : "Rendre actif" }}</button>
+                        <button type="button" class="btn btn-danger btn_supprimer" data-id="{{ user.getId() }}">Supprimer</button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+    <script>
+        $datatable = $("#datatable_users").DataTable();
+
+        $(".btn_actif").each(function() {
+            $(this).click(function() {
+                let url = "{{ path('admin_users_list_actif') }}"
+                url += "/" + $(this).data("id");
+                let rowIdx = $datatable.row($(this).closest("tr")).index()
+                let cell = $datatable.cell(rowIdx, 3);
+                let btn = $(this);
+                $.ajax({
+                    url: url,
+                    method: "POST",
+                    success: function(result) {
+                        if (result.is_ok) {
+                            if (cell.data() === "Oui") {
+                                btn.html("Rendre actif");
+                                cell.data("Non").draw()
+                            } else {
+                                btn.html("Rendre inactif");
+                                cell.data("Oui").draw()
+                            }
+                            $.notify(result.message, {className: "success"});
+                        } else {
+                            $.notify(result.message, {className: "error"})
+                        }
+                    },
+                })
+            })
+        })
+
+
+        $(".btn_supprimer").each(function() {
+            $(this).click(function() {
+                let url = "{{ path('admin_users_list_delete') }}"
+                url += "/" + $(this).data("id");
+                let btn = $(this);
+                if (confirm("Etes-vous sûr de vouloir supprimer l'utilisateur ?")) {
+                    $.ajax({
+                        url: url,
+                        method: "POST",
+                        success: function (result) {
+                            if (result.is_ok) {
+                                $datatable.row(btn.closest("tr")).remove().draw()
+                                $.notify(result.message, {className: "success"});
+                            } else {
+                                $.notify(result.message, {className: "error"});
+                            }
+                        },
+                    });
+                }
+            })
+        })
+
+
+    </script>
+
+
+{% endblock %}
