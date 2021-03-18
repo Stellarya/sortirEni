@@ -11,6 +11,7 @@ use App\Repository\SiteRepository;
 use App\Repository\SortieRepository;
 use App\Repository\UserRepository;
 use DateTime;
+use Doctrine\DBAL\Driver\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -237,8 +238,11 @@ class SortieController extends AbstractController
     /**
      * @Route("/sortie/detail/{id}", name="page_details_sortie", requirements={"id": "\d+"})
      * @param SortieRepository $sortieRepository
+     * @param ParticipantRepository $participantRepository
      * @param int|null $id
      * @return Response
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function detailSortie(SortieRepository $sortieRepository, ParticipantRepository $participantRepository, int $id = null): Response
     {
