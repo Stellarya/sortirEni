@@ -9,6 +9,7 @@ use App\Form\RegisterImportType;
 use App\Form\RegisterType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -58,6 +59,7 @@ class AdminController extends AbstractController
 
         $participantForm->remove("estInscrit");
         $userForm->remove("roles");
+        $userForm->remove("avatar");
         $userForm->remove("old_password");
         $userForm->remove("new_password");
         $participantForm->setData($participant);
@@ -170,6 +172,7 @@ class AdminController extends AbstractController
      * @Route("/admin/users/list", name="admin_users_list")
      */
     public function list_users(Request $request): Response {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
 
         $em = $this->getDoctrine()->getRepository(User::class);
         $list_users = $em->findAll();
@@ -181,4 +184,68 @@ class AdminController extends AbstractController
             ]
         );
     }
+
+    /**
+     * @Route("/admin/users/list/delete/{id<\d+>?0}", name="admin_users_list_delete")
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function ajax_list_user_delete(Request $request, int $id): JsonResponse {
+        try {
+            $this->getDoctrine()->getConnection()->beginTransaction();
+            $em = $this->getDoctrine()->getManager();
+            $user = $em->find(User::class, $id);
+            if ($user->getId() === $this->getUser()->getId()) {
+                throw new \Exception("Impossible de modifier votre compte en étant connecté dessus.");
+            }
+            $em->remove($user);
+            $em->flush();
+            $this->getDoctrine()->getConnection()->rollback();
+            return new JsonResponse([
+                "is_ok" => true,
+                "message" => "Utilisateur supprimé avec succès"
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                "is_ok" => false,
+                "message" => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * @Route("/admin/users/list/actif/{id<\d+>?0}", name="admin_users_list_actif")
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function ajax_list_user_actif(Request $request, int $id): JsonResponse {
+        try {
+            $this->getDoctrine()->getConnection()->beginTransaction();
+            $em = $this->getDoctrine()->getManager();
+            /** @var User $user */
+            $user = $em->find(User::class, $id);
+            if ($user->getId() === $this->getUser()->getId()) {
+                throw new \Exception("Impossible de modifier votre compte en étant connecté dessus.");
+            }
+            /** @var Participant $participant */
+            $participant = $user->getParticipant();
+            $participant->setActif(!$participant->getActif());
+            $em->persist($participant);
+            $em->flush();
+            $this->getDoctrine()->getConnection()->commit();
+            return new JsonResponse([
+                "is_ok" => true,
+                "message" => "Utilisateur modifié avec succès"
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                "is_ok" => false,
+                "message" => $e->getMessage(),
+            ]);
+        }
+    }
+
+
 }
