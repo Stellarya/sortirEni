@@ -38,7 +38,13 @@ class Sortie
     private $dateHeureDebut;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @Assert\NotBlank(message="Merci de renseigner une durée en minutes.")
+     * @Assert\Length(
+     *     min="1", max="3",
+     *     minMessage="1 caractère minimum.",
+     *     maxMessage="3 caractères maximum."
+     * )
+     * @ORM\Column(type="integer", nullable=false)
      */
     private $duree;
 
@@ -51,9 +57,9 @@ class Sortie
     /**
      * @Assert\NotBlank(message="Merci de renseigner un nombre d'inscriptions maximum.")
      * @Assert\Length(
-     *     min="1", max="11",
+     *     min="1", max="3",
      *     minMessage="1 caractère minimum.",
-     *     maxMessage="11 caractères maximum."
+     *     maxMessage="3 caractères maximum."
      * )
      * @ORM\Column(type="integer")
      */
