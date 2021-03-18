@@ -1,18 +1,18 @@
 <div style="margin:10px">
     {% for flash_message in app.session.flashBag.get('info') %}
-        <div class="alert alert-warning" role="alert">
+        <div class="alert alert-warning msg_alert" role="alert">
             {{ flash_message }}
         </div>
     {% endfor %}
 
     {% for flash_message in app.session.flashBag.get('success') %}
-        <div class="alert alert-success" role="alert">
+        <div class="alert alert-success msg_alert" role="alert">
             {{ flash_message }}
         </div>
     {% endfor %}
 
     {% for flash_message in app.session.flashBag.get('alert') %}
-        <div class="alert alert-danger" role="alert">
+        <div class="alert alert-danger msg_alert" role="alert">
             {{ flash_message }}
         </div>
     {% endfor %}
