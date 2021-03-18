@@ -37,6 +37,7 @@ class AdminController extends AbstractController
      */
     public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, int $id): Response
     {
+        $title = "Inscription manuelle d'un utilisateur";
         $entityManager = $this->getDoctrine()->getManager();
         $user = new User();
         $participant = new Participant();
@@ -55,6 +56,7 @@ class AdminController extends AbstractController
             /** @var Participant $participant */
             $participant = $user->getParticipant();
             $userForm->remove("password");
+            $title = "Edition de {$user->getParticipant()->getIdentite()}";
         }
 
         $participantForm->remove("estInscrit");
@@ -89,7 +91,7 @@ class AdminController extends AbstractController
         return $this->render(
             'admin/register.html.twig', [
                 'form' => $form->createView(),
-                'title' => 'Inscription d\'un utilisateur'
+                'title' => $title,
             ]
         );
     }

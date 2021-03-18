@@ -3,7 +3,8 @@
 {% block body %}
 
     <div class="container">
-        <h1>{{ title }}</h1>
+
+        {% form_theme form 'bootstrap_4_horizontal_layout.html.twig' %}
 
         <button type="button" class="btn btn-primary mb-3" data-toggle="collapse" data-target="#filtres">Afficher les filtres</button>
         <div id="filtres" class="collapse">
@@ -50,7 +51,7 @@
                             </p>
 
                         </div>
-                        <a href="{{ path('page_details_sortie', {'id' : sortie.id}) }}" class="btn btn-secondary">Plus d'informations</a>
+                        <a href="{{ path('page_details_sortie', {'id' : sortie.id, 'pageNumber' : pageNumber}) }}" class="btn btn-secondary">Plus d'informations</a>
                     </div>
             </div>
         {% endfor %}

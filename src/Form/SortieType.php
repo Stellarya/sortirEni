@@ -9,6 +9,7 @@ use App\Repository\LieuRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -41,8 +42,16 @@ class SortieType extends AbstractType
                     'widget' => 'single_text',
                     'label' => 'Date limite d\'inscription '
                 ])
-            ->add('duree')
-            ->add('nbInscriptionMax')
+            ->add('duree', NumberType::class,
+                [
+                    'label' => 'Durée (en minutes)',
+                    'html5' => true,
+                ])
+            ->add('nbInscriptionMax', NumberType::class,
+                [
+                    'label' => 'Nombre d\'inscriptions maximum',
+                    'html5' => true,
+                ])
             ->add('infosSortie',
                 TextareaType::class,
                 [
