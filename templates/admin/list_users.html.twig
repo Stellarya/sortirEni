@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+
+{% block body %}
+    <table>
+        <thead>
+        <tr>
+            <th>Pseudo</th>
+            <th>Prénom</th>
+            <th>Nom</th>
+            <th>Actif</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in list_users %}
+            <tr>
+                <td>{{ user.getUsername() }}</td>
+                <td>{{ user.getParticipant().getPrenom() }}</td>
+                <td>{{ user.getParticipant().getNom() }}</td>
+                <td>{{ user.getParticipant().getActif() }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

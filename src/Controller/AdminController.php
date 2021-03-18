@@ -165,4 +165,20 @@ class AdminController extends AbstractController
             ]
         );
     }
+
+    /**
+     * @Route("/admin/users/list", name="admin_users_list")
+     */
+    public function list_users(Request $request): Response {
+
+        $em = $this->getDoctrine()->getRepository(User::class);
+        $list_users = $em->findAll();
+
+        return $this->render(
+            'admin/list_users.html.twig', [
+                "list_users" => $list_users,
+                "title" => "Liste des utilisateurs"
+            ]
+        );
+    }
 }
