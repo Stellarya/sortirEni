@@ -121,7 +121,6 @@ class SortieRepository extends ServiceEntityRepository
      */
     public function findSortiesEntreDeuxDates($dateDebut, $dateFin): array
     {
-        var_dump($dateDebut->format('Y-m-d H:i:s'), $dateFin->format('Y-m-d H:i:s'));
         $qb = $this->createQueryBuilder('s');
         $qb->join('s.etat', 'e')
             ->where($qb->expr()->eq('e.libelle', '?3'))
