@@ -13,6 +13,7 @@ use App\Repository\SiteRepository;
 use App\Repository\SortieRepository;
 use App\Repository\UserRepository;
 use DateTime;
+use Doctrine\DBAL\Driver\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
 use JetBrains\PhpStorm\ArrayShape;
@@ -23,7 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-
+use Mobile_Detect;
 
 class SortieController extends AbstractController
 {
@@ -38,6 +39,7 @@ class SortieController extends AbstractController
         'Activité terminée' => '#283671',
         'Activité historisée' => '#E866A6',
     ];
+
 
     /**
      * @Route("/sortie/{pageNumber}", name="page_sortie")
@@ -56,6 +58,7 @@ class SortieController extends AbstractController
                           int $pageNumber = 1): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $detect = new Mobile_Detect();
 
         $maxResults = $session->get("maxResult");
         if (!isset($maxResults)) {
@@ -149,6 +152,7 @@ class SortieController extends AbstractController
                     'form' => $form->createView(),
                     'title' => "Liste des sorties",
                     'couleurs' => self::ETAT_COULEURS,
+                    'isMobile' => $detect->isMobile(),
                 ]
             );
         }
@@ -248,7 +252,7 @@ class SortieController extends AbstractController
      * @param int|null $id
      * @param int $pageNumber
      * @return Response
-     * @throws \Doctrine\DBAL\Driver\Exception
+     * @throws Exception
      * @throws \Doctrine\DBAL\Exception
      */
     public function detailSortie(SortieRepository $sortieRepository,
@@ -618,7 +622,6 @@ class SortieController extends AbstractController
         } else {
             $nbSorties = $sortieRepository->countSorties();
         }
-
         $nbPage = ceil($nbSorties / $maxResults);
         $pagesAafficher = array($pageNumber - 1, $pageNumber + 1, $pageNumber + 2);
         if ($nbPage == 0)

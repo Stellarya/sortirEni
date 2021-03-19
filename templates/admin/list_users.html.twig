@@ -4,15 +4,32 @@
 {% block body %}
 
 
-    <div class="alert alert-light sortir-box">
-        <table id="datatable_users">
+    <div class="alert alert-light">
+
+        <br>
+
+        <div class="row">
+            <div class="col-md-12">
+                <select id="action_users">
+                    <option value="opt_actif" >Rendre actif</option>
+                    <option value="opt_inactif">Rendre inactif</option>
+                    <option value="opt_supprimer" selected>Supprimer</option>
+                </select>
+
+                <button type="button" class="btn btn-primary" id="btn_valider_selection">Valider</button>
+            </div>
+        </div>
+
+        <br>
+
+        <table id="datatable_users" class="display">
             <thead>
             <tr>
                 <th>Pseudo</th>
                 <th>Prénom</th>
                 <th>Nom</th>
                 <th>Actif</th>
-                <th>Action</th>
+                <th hidden>id</th>
             </tr>
             </thead>
             <tbody>
@@ -22,70 +39,101 @@
                     <td>{{ user.getParticipant().getPrenom() }}</td>
                     <td>{{ user.getParticipant().getNom() }}</td>
                     <td>{{ (user.getParticipant().getActif()) ? "Oui" : "Non" }}</td>
-                    <td>
-                        <button type="button" class="btn btn-info btn_actif" data-id="{{ user.getId() }}">{{ (user.getParticipant().getActif()) ? "Rendre inactif" : "Rendre actif" }}</button>
-                        <button type="button" class="btn btn-danger btn_supprimer" data-id="{{ user.getId() }}">Supprimer</button>
-                    </td>
+                    <td hidden>{{ user.getId() }}</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
 
-
-
-
     <script>
         $datatable = $("#datatable_users").DataTable();
 
-        $(".btn_actif").each(function() {
-            $(this).click(function() {
-                let url = "{{ path('admin_users_list_actif') }}"
-                url += "/" + $(this).data("id");
-                let rowIdx = $datatable.row($(this).closest("tr")).index()
-                let cell = $datatable.cell(rowIdx, 3);
-                let btn = $(this);
+
+        $('#datatable_users tbody').on( 'click', 'tr', function () {
+            $(this).toggleClass('selected');
+        } );
+
+        $('#btn_valider_selection').click( function () {
+            let ids = [];
+            $datatable.rows(".selected").each(function(idx) {
+                ids = [
+                    idx, //index datatable
+                    Array.from(this.data().map(x => x[4])) //id sql
+                ]
+            })
+
+            if (ids[1].length > 0) {
+                switch ($("#action_users").val()) {
+                    case "opt_actif":
+                        return ajax_set_actif(true, ids);
+                    case "opt_inactif":
+                        return ajax_set_actif(false, ids);
+                    case "opt_supprimer":
+                        return ajax_supprimer(ids);
+                }
+            } else {
+                $.notify("Aucune ligne du tableau n'est sélectionnée !", {className: "error"})
+            }
+
+        } );
+
+
+        function ajax_set_actif(toggle, data) {
+            let url = "{{ path('admin_users_list_actif') }}"
+            $.ajax({
+                url: url,
+                method: "POST",
+                data: {
+                    toggle: toggle,
+                    list_id: data[1]
+                },
+                success: function(result) {
+                    if (result.is_ok) {
+                        $.each(data[0], function(idx, val) {
+                            let cell = $datatable.cell(val, 3)
+                            cell.data((toggle) ? "Oui" : "Non").draw()
+                        })
+                        $.notify(result.message, {className: "success"});
+                    } else {
+                        $.notify(result.message, {className: "error"})
+                    }
+                },
+            })
+        }
+
+        function ajax_supprimer(data) {
+            let url = "{{ path('admin_users_list_delete') }}"
+            if (confirm("Etes-vous sûr de vouloir supprimer l'utilisateur ?")) {
                 $.ajax({
                     url: url,
                     method: "POST",
-                    success: function(result) {
+                    data: {
+                        list_id: data[1]
+                    },
+                    success: function (result) {
                         if (result.is_ok) {
-                            if (cell.data() === "Oui") {
-                                btn.html("Rendre actif");
-                                cell.data("Non").draw()
-                            } else {
-                                btn.html("Rendre inactif");
-                                cell.data("Oui").draw()
-                            }
+                            $.each(data[0], function(idx, val) {
+                                console.log(val)
+                                $datatable.row(val).remove().draw()
+                            })
                             $.notify(result.message, {className: "success"});
                         } else {
-                            $.notify(result.message, {className: "error"})
+                            $.notify(result.message, {className: "error"});
                         }
                     },
-                })
-            })
-        })
+                });
+            }
+        }
+
 
 
         $(".btn_supprimer").each(function() {
             $(this).click(function() {
-                let url = "{{ path('admin_users_list_delete') }}"
+
                 url += "/" + $(this).data("id");
                 let btn = $(this);
-                if (confirm("Etes-vous sûr de vouloir supprimer l'utilisateur ?")) {
-                    $.ajax({
-                        url: url,
-                        method: "POST",
-                        success: function (result) {
-                            if (result.is_ok) {
-                                $datatable.row(btn.closest("tr")).remove().draw()
-                                $.notify(result.message, {className: "success"});
-                            } else {
-                                $.notify(result.message, {className: "error"});
-                            }
-                        },
-                    });
-                }
+
             })
         })
 

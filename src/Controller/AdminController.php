@@ -190,25 +190,28 @@ class AdminController extends AbstractController
     /**
      * @Route("/admin/users/list/delete/{id<\d+>?0}", name="admin_users_list_delete")
      * @param Request $request
-     * @param int $id
      * @return JsonResponse
      */
-    public function ajax_list_user_delete(Request $request, int $id): JsonResponse {
+    public function ajax_list_user_delete(Request $request): JsonResponse {
         try {
+            $list_id = $request->request->get("list_id");
             $this->getDoctrine()->getConnection()->beginTransaction();
-            $em = $this->getDoctrine()->getManager();
-            $user = $em->find(User::class, $id);
-            if ($user->getId() === $this->getUser()->getId()) {
-                throw new \Exception("Impossible de modifier votre compte en étant connecté dessus.");
+            foreach ($list_id as $id) {
+                $em = $this->getDoctrine()->getManager();
+                $user = $em->find(User::class, $id);
+                if ($user->getId() === $this->getUser()->getId()) {
+                    throw new \Exception("Impossible de modifier votre compte en étant connecté dessus.");
+                }
+                $em->remove($user);
+                $em->flush();
             }
-            $em->remove($user);
-            $em->flush();
             $this->getDoctrine()->getConnection()->rollback();
             return new JsonResponse([
                 "is_ok" => true,
                 "message" => "Utilisateur supprimé avec succès"
             ]);
         } catch (\Exception $e) {
+            $this->getDoctrine()->getConnection()->rollback();
             return new JsonResponse([
                 "is_ok" => false,
                 "message" => $e->getMessage(),
@@ -217,31 +220,35 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @Route("/admin/users/list/actif/{id<\d+>?0}", name="admin_users_list_actif")
+     * @Route("/admin/users/list/actif", name="admin_users_list_actif")
      * @param Request $request
-     * @param int $id
      * @return JsonResponse
      */
-    public function ajax_list_user_actif(Request $request, int $id): JsonResponse {
+    public function ajax_list_user_actif(Request $request): JsonResponse {
         try {
+            $enable = $request->request->get("toggle") === "true";
+            $list_id = $request->request->get("list_id");
             $this->getDoctrine()->getConnection()->beginTransaction();
-            $em = $this->getDoctrine()->getManager();
-            /** @var User $user */
-            $user = $em->find(User::class, $id);
-            if ($user->getId() === $this->getUser()->getId()) {
-                throw new \Exception("Impossible de modifier votre compte en étant connecté dessus.");
+            foreach ($list_id as $id) {
+                $em = $this->getDoctrine()->getManager();
+                /** @var User $user */
+                $user = $em->find(User::class, $id);
+                if ($user->getId() === $this->getUser()->getId()) {
+                    throw new \Exception("Impossible de modifier votre compte en étant connecté dessus.");
+                }
+                /** @var Participant $participant */
+                $participant = $user->getParticipant();
+                $participant->setActif($enable);
+                $em->persist($participant);
+                $em->flush();
             }
-            /** @var Participant $participant */
-            $participant = $user->getParticipant();
-            $participant->setActif(!$participant->getActif());
-            $em->persist($participant);
-            $em->flush();
             $this->getDoctrine()->getConnection()->commit();
             return new JsonResponse([
                 "is_ok" => true,
                 "message" => "Utilisateur modifié avec succès"
             ]);
         } catch (\Exception $e) {
+            $this->getDoctrine()->getConnection()->rollback();
             return new JsonResponse([
                 "is_ok" => false,
                 "message" => $e->getMessage(),

@@ -28,6 +28,7 @@ class ParticipantType extends AbstractType
             ])
             ->add('actif', CheckboxType::class, [
                 "label" => "Actif",
+                'required' => false,
             ])
             ->add("estRattacheA", EntityType::class, [
                 "label" => "Site",

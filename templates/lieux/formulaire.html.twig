@@ -1,0 +1,49 @@
+{% extends('base.html.twig') %}
+{% block body %}
+    <div class="container">
+        {{ form_start(lieuForm, {'attr': {'class': 'form-inline'}}) }}
+        {{ form_errors(lieuForm) }}
+        <div class="col-12">
+            <div class="form-group mb-3 row">
+                <label class="col-2 col-form-label" for="nom_lieu">Nom
+                    <span class="required">*</span>
+                </label>
+                <div class="col-3">
+                    {{ form_widget(lieuForm.nom, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="col-1"></div>
+                <label class="col-2 col-form-label" for="rue_lieu">Rue
+                    <span class="required">*</span>
+                </label>
+                <div class="col-3">
+                    {{ form_widget(lieuForm.rue, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="form-group mb-3 row">
+                <label class="col-2 col-form-label" for="latitude_lieu">Latitude
+                </label>
+                <div class="col-3">
+                    {{ form_widget(lieuForm.latitude, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="col-1"></div>
+                <label class="col-2 col-form-label" for="longitude_lieu">Longitude
+                </label>
+                <div class="col-3">
+                    {{ form_widget(lieuForm.longitude, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+            <div class="form-group mb-3 row">
+                <label class="col-2 col-form-label" for="ville_lieu">Ville
+                    <span class="required">*</span>
+                </label>
+                <div class="col-3">
+                    {{ form_widget(lieuForm.ville, {'attr': {'class': 'form-control'}}) }}
+                </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center w-100 d-none d-sm-flex mt-4">
+        {{ form_widget(lieuForm.ajouter, {'attr': {'class': 'btn btn-success'} }) }}
+        {{ form_end(lieuForm) }}
+    </div>
+
+{% endblock %}

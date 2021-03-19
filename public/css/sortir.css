@@ -29,6 +29,14 @@ h1, h2, h3, h4, h5 {
     border-color: var(--contrast-color) !important;
 }
 
+.width_22px {
+    width: 22px !important;
+}
+
+.height100 {
+    height: 100px;
+}
+
 /* NAVIGATION -------------------------------------------------------------------------------------------------------*/
 .navbar-light .navbar-nav .nav-item a.nav-link, #navbarSupportedContent .navbar-nav.user_nav span.nav-link{
     color: var(--primary-color);

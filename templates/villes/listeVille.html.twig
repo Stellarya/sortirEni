@@ -1,0 +1,65 @@
+{% extends('base.html.twig') %}
+
+{% block body %}
+    <div class="alert alert-light sortir-box">
+        <div class="w-100 d-flex align-items-end justify-content-end mb-3">
+            <p></p>
+            <a href="{{ path('villes_form', {'id' : -1}) }}" class="btn btn-secondary btn-round">
+                <i class="fas fa-city"></i>
+                <span>Ajouter une ville</span>
+            </a>
+        </div>
+        <table id="datatable_villes">
+            <thead>
+            <tr>
+                <th class="d-none">ID</th>
+                <th>Nom</th>
+                <th>CodePostal</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for ville in villes %}
+                <tr>
+                    <td class="d-none">{{ ville.id }}/td>
+                    <td>{{ ville.nom }}</td>
+                    <td>{{ ville.codePostal }}</td>
+                    <td class="d-flex flex-row-reverse">
+                        <button type="button" class="btn btn-danger btn_supprimer" data-id="{{ ville.getId() }}">
+                            Supprimer
+                        </button>
+                        <a href="{{ path('villes_form', {'id' : ville.getId()}) }}" type="button" class="btn btn-primary btn_modifier mr-2" data-id="{{ ville.getId() }}">
+                            Modifier
+                        </a>
+
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        $datatable = $("#datatable_villes").DataTable();
+        $(".btn_supprimer").each(function () {
+            $(this).click(function () {
+                let url = "{{ path('villes_delete') }}"
+                url += "/" + $(this).data("id");
+                let btn = $(this);
+                if (confirm("Etes-vous sûr de vouloir supprimer la ville ?")) {
+                    $.ajax({
+                        url: url,
+                        method: "POST",
+                        success: function (result) {
+                            if (result.is_ok) {
+                                $datatable.row(btn.closest("tr")).remove().draw()
+                                $.notify(result.message, {className: "success"});
+                            } else {
+                                $.notify(result.message, {className: "error"});
+                            }
+                        },
+                    });
+                }
+            })
+        })
+    </script>
+{% endblock %}
