@@ -36,10 +36,7 @@ class LieuController extends AbstractController
 
         return $this->render('lieux/listeLieu.html.twig', [
             'title' => 'Liste des Lieux',
-            'lieux' => $toLieu,
-            'latitude' => $latitude,
-            'longitude' => $longitude,
-            'rue' => $rue
+            'lieux' => $toLieu
         ]);
     }
 
