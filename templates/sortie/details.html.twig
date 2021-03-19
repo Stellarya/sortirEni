@@ -58,7 +58,7 @@
                             </table>
                         </div>
                         <div class="card-text d-flex justify-content-between">
-                            {% if tIdParticipants is empty %}
+                            {% if peutSinscrire %}
                                 <form action="{{ path('page_inscription_sortie', {'id' : sortie.id}) }}"
                                       method="post" class="mr-2">
                                     <input type="hidden" value="{{ app.user.participant.id }}"
@@ -68,32 +68,17 @@
                                     </button>
                                 </form>
                             {% endif %}
-                            {% for idParticipant in tIdParticipants %}
-                                {% if participants|length < sortie.nbInscriptionMax and date(sortie.dateLimiteInscription) > date()
-                                    and app.user.participant.id not in idParticipant and date(sortie.dateHeureDebut) > date() %}
-
-                                    <form action="{{ path('page_inscription_sortie', {'id' : sortie.id}) }}"
-                                          method="post" class="mr-2">
-                                        <input type="hidden" value="{{ app.user.participant.id }}"
-                                               name="idParticipant">
-                                        <button id="inscription_sortie" type="submit"
-                                                class="btn btn-secondary">S'inscrire
-                                        </button>
-                                    </form>
-                                {% endif %}
-                                {% if app.user.participant.id in idParticipant %}
-                                    <form action="{{ path('page_desinscription_sortie', {'id' : sortie.id}) }}"
-                                          method="post"
-                                          class="ml-2">
-                                        <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
-                                        <button id="desinscription_sortie" type="submit"
-                                                class="btn btn-danger">Se désinscrire
-                                        </button>
-                                    </form>
-                                {% endif %}
-                            {% endfor %}
-                            {% if (app.user.participant.id == sortie.organisateur.id
-                                or "ROLE_ADMIN" in app.user.roles) and date(sortie.dateHeureDebut) > date()%}
+                            {% if peutSeDesinscrire %}
+                                <form action="{{ path('page_desinscription_sortie', {'id' : sortie.id}) }}"
+                                      method="post"
+                                      class="ml-2">
+                                    <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
+                                    <button id="desinscription_sortie" type="submit"
+                                            class="btn btn-danger">Se désinscrire
+                                    </button>
+                                </form>
+                            {% endif %}
+                            {% if peutAnnuler %}
                                 <form action="{{ path('page_annulation_sortie', {'id' : sortie.id}) }}"
                                       method="post"
                                       class="ml-2">
@@ -103,8 +88,16 @@
                                     </button>
                                 </form>
                             {% endif %}
-                            <a href="{{ path('page_formulaire_sortie', {'id' : sortie.id}) }}"
-                               class="btn btn-primary ml-2">Modifier</a>
+                            {% if peutModifier %}
+                                <form action="{{ path('page_formulaire_sortie', {'id' : sortie.id}) }}"
+                                      method="post"
+                                      class="ml-2">
+                                    <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
+                                    <button id="annuler_sortie" type="submit"
+                                            class="btn btn-primary">Modifier
+                                    </button>
+                                </form>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
