@@ -48,7 +48,7 @@
                             {% endif %}
                         </div>
 
-                        <div class="card-body">
+                        <div class="card-body bg-light">
                             <h5 class="card-title">{{ sortie.nom }}</h5>
                             <p class="card-text">{{ sortie.infosSortie|striptags|slice(0,50) }}
                                 {% if sortie.infosSortie|length > 50 %}
@@ -59,10 +59,11 @@
                                 <br>
                                 À {{ sortie.Lieu.Ville.Nom }} le {{ sortie.dateHeureDebut|date("d/m/Y") }}
                             </p>
-
                         </div>
-                        <a href="{{ path('page_details_sortie', {'id' : sortie.id, 'pageNumber' : pageNumber}) }}"
-                           class="btn btn-secondary">Plus d'informations</a>
+
+                            <a href="" class="btn disabled" style="background-color:{{ couleurs[sortie.etat.libelle] }}; color:#FFFFFF">{{ sortie.etat.libelle }}</a>
+
+                        <a href="{{ path('page_details_sortie', {'id' : sortie.id, 'pageNumber' : pageNumber}) }}" class="btn btn-secondary">Plus d'informations</a>
                     </div>
                 </div>
             {% endfor %}

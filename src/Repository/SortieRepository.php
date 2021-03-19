@@ -33,9 +33,8 @@ class SortieRepository extends ServiceEntityRepository
 
     /**
      * @param $siteID
-     * @param $resultatsMax
-     * @param $numPage
      * @return int|mixed|string
+     * @throws QueryException
      */
     public function findSortiesParSite($siteID){
         $qb = $this->createQueryBuilder('s');
@@ -80,10 +79,10 @@ class SortieRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('s');
         $qb->join('s.organisateur', 'o')
             ->join('s.etat', 'e')
-            ->where($qb->expr()->eq('o.id', $id))
-            ->andWhere($qb->expr()->eq('e.libelle', '?2'))
+            ->where($qb->expr()->eq('e.libelle', '?2'))
             ->orWhere($qb->expr()->eq('e.libelle', '?3'))
             ->orWhere($qb->expr()->eq('e.libelle', '?4'))
+            ->andWhere($qb->expr()->eq('o.id', $id))
             ->addCriteria($this->criteria)
              ;
 
@@ -102,10 +101,10 @@ class SortieRepository extends ServiceEntityRepository
     public function findSortiesParTexte($texte): array
     {
         $qb = $this->createQueryBuilder('s');
-        $qb->where($qb->expr()->like('s.nom', '?1'))
-            ->join('s.etat', 'e')
-            ->andWhere($qb->expr()->eq('e.libelle', '?2'))
+        $qb->join('s.etat', 'e')
+            ->where($qb->expr()->eq('e.libelle', '?2'))
             ->orWhere($qb->expr()->eq('e.libelle', '?3'))
+            ->andWhere($qb->expr()->like('s.nom', '?1'))
             ->addCriteria($this->criteria)
              ;
         $query = $qb->getQuery();
@@ -122,13 +121,12 @@ class SortieRepository extends ServiceEntityRepository
      */
     public function findSortiesEntreDeuxDates($dateDebut, $dateFin): array
     {
-        var_dump($dateDebut->format('Y-m-d H:i:s'), $dateFin->format('Y-m-d H:i:s'));
         $qb = $this->createQueryBuilder('s');
-        $qb->where($qb->expr()->gte('s.dateHeureDebut', '?1'))
-            ->andWhere($qb->expr()->lte('s.dateHeureDebut', '?2'))
-            ->join('s.etat', 'e')
-            ->andWhere($qb->expr()->eq('e.libelle', '?3'))
+        $qb->join('s.etat', 'e')
+            ->where($qb->expr()->eq('e.libelle', '?3'))
             ->orWhere($qb->expr()->eq('e.libelle', '?4'))
+            ->andWhere($qb->expr()->gte('s.dateHeureDebut', '?1'))
+            ->andWhere($qb->expr()->lte('s.dateHeureDebut', '?2'))
             ->addCriteria($this->criteria);
         $query = $qb->getQuery();
         $query->setParameter(1, $dateDebut->format('Y-m-d H:i:s'));
@@ -145,10 +143,10 @@ class SortieRepository extends ServiceEntityRepository
     public function findSortiesApresUneDate($dateDebut): array
     {
         $qb = $this->createQueryBuilder('s');
-        $qb->where($qb->expr()->gte('s.dateHeureDebut', '?1'))
-            ->join('s.etat', 'e')
-            ->andWhere($qb->expr()->eq('e.libelle', '?2'))
+        $qb->join('s.etat', 'e')
+            ->where($qb->expr()->eq('e.libelle', '?2'))
             ->orWhere($qb->expr()->eq('e.libelle', '?3'))
+            ->andWhere($qb->expr()->gte('s.dateHeureDebut', '?1'))
             ->addCriteria($this->criteria)
              ;
         $query = $qb->getQuery();
@@ -165,10 +163,10 @@ class SortieRepository extends ServiceEntityRepository
     public function findSortiesAvantUneDate($dateFin): array
     {
         $qb = $this->createQueryBuilder('s');
-        $qb->where($qb->expr()->lte('s.dateHeureDebut', '?1'))
-            ->join('s.etat', 'e')
-            ->andWhere($qb->expr()->eq('e.libelle', '?2'))
+        $qb->join('s.etat', 'e')
+            ->where($qb->expr()->eq('e.libelle', '?2'))
             ->orWhere($qb->expr()->eq('e.libelle', '?3'))
+            ->andWhere($qb->expr()->lte('s.dateHeureDebut', '?1'))
             ->addCriteria($this->criteria)
              ;
         $query = $qb->getQuery();
@@ -179,19 +177,19 @@ class SortieRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param $date
      * @return Sortie[] Returns an array of Sortie objects
+     * @throws QueryException
      */
-    public function findSortiesParDatePassee($date): array
+    public function findSortiesParDatePassee(): array
     {
         $qb = $this->createQueryBuilder('s');
-        $qb->where($qb->expr()->lt('s.dateHeureDebut', '?1'))
+        $qb
             ->join('s.etat', 'e')
             ->andWhere($qb->expr()->eq('e.libelle', '?2'))
             ->addCriteria($this->criteria)
              ;
         $query = $qb->getQuery();
-        $query->setParameter(1, $date)
+        $query
             ->setParameter(2, "Activité terminée");
         return $query->getResult();
     }
@@ -205,9 +203,9 @@ class SortieRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('s');
         $qb->join('s.participants', 'p')
             ->join('s.etat', 'e')
-            ->where($qb->expr()->eq('p.id', $id))
-            ->andWhere($qb->expr()->eq('e.libelle', '?2'))
+            ->where($qb->expr()->eq('e.libelle', '?2'))
             ->orWhere($qb->expr()->eq('e.libelle', '?3'))
+            ->andWhere($qb->expr()->eq('p.id', $id))
             ->addCriteria($this->criteria)
              ;
         $query = $qb->getQuery()
