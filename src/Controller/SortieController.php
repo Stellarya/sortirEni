@@ -148,7 +148,7 @@ class SortieController extends AbstractController
                     'maxResults' => $maxResults,
                     'form' => $form->createView(),
                     'title' => "Liste des sorties",
-                    'couleurs' => self::ETAT_COULEURS
+                    'couleurs' => self::ETAT_COULEURS,
                 ]
             );
         }
