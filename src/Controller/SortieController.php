@@ -11,6 +11,7 @@ use App\Repository\SiteRepository;
 use App\Repository\SortieRepository;
 use App\Repository\UserRepository;
 use DateTime;
+use Doctrine\DBAL\Driver\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,11 +21,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-
+use Mobile_Detect;
 
 class SortieController extends AbstractController
 {
     public $siteID = null;
+
 
     /**
      * @Route("/sortie/{pageNumber}", name="page_sortie")
@@ -43,6 +45,7 @@ class SortieController extends AbstractController
                           int $pageNumber = 1): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $detect = new Mobile_Detect();
 
         $maxResults = $session->get("maxResult");
         if (!isset($maxResults)) {
@@ -61,28 +64,13 @@ class SortieController extends AbstractController
             ["username" => $this->getUser()->getUsername()]
         )->getParticipant();
         $this->siteID = $participantConnecte->getEstRattacheA()->getId();
-        $sorties = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
+        $sorties = $sortieRepository->findSortiesParSite($this->siteID);
         list($nbPage, $pagesAafficher) = $this->getInfosPourPagination(
             $sortieRepository,
             $maxResults,
             $pageNumber,
             $session
         );
-
-        $dataFromSession = $session->get('data');
-        if (isset($dataFromSession)) {
-            $participantConnecte = $userRepository->findOneBy(
-                ["username" => $this->getUser()->getUsername()]
-            )->getParticipant();
-            $this->siteID = $participantConnecte->getEstRattacheA()->getId();
-            $sorties = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
-            list($nbPage, $pagesAafficher) = $this->getInfosPourPagination(
-                $sortieRepository,
-                $maxResults,
-                $pageNumber,
-                $session
-            );
-        }
 
         $dataFromSession = $session->get('data');
 
@@ -126,7 +114,7 @@ class SortieController extends AbstractController
 
             } else {
                 $sorties = [];
-                $sortiesConcernees = $sortieRepository->findSortiesParSite($this->siteID, $maxResults, $pageNumber);
+                $sortiesConcernees = $sortieRepository->findSortiesParSite($this->siteID);
                 $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
                 $session->set('nbSorties', count($sorties));
                 $firstResult = ($pageNumber - 1) * $maxResults;
@@ -149,6 +137,7 @@ class SortieController extends AbstractController
                     'secondEllipsis' => $pageNumber + 3,
                     'maxResults' => $maxResults,
                     'form' => $form->createView(),
+                    'isMobile' => $detect->isMobile(),
                     'title' => "Liste des sorties"
                 ]
             );
@@ -235,12 +224,19 @@ class SortieController extends AbstractController
     }
 
     /**
-     * @Route("/sortie/detail/{id}", name="page_details_sortie", requirements={"id": "\d+"})
+     * @Route("/sortie/detail/{id}/{pageNumber}", name="page_details_sortie", requirements={"id": "\d+"})
      * @param SortieRepository $sortieRepository
+     * @param ParticipantRepository $participantRepository
      * @param int|null $id
+     * @param int $pageNumber
      * @return Response
+     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function detailSortie(SortieRepository $sortieRepository, ParticipantRepository $participantRepository, int $id = null): Response
+    public function detailSortie(SortieRepository $sortieRepository,
+                                 ParticipantRepository $participantRepository,
+                                 int $id = null,
+                                 int $pageNumber = 1): Response
     {
         $sortie = $sortieRepository->find($id);
         $nom = $sortie->getNom();
@@ -266,7 +262,7 @@ class SortieController extends AbstractController
                 'longitude' => $longitude,
                 'participants' => $tParticipants,
                 'tIdParticipants' => $participants,
-
+                'pageNumber' => $pageNumber,
             ]
         );
     }
@@ -486,7 +482,6 @@ class SortieController extends AbstractController
         } else {
             $nbSorties = $sortieRepository->countSorties();
         }
-
         $nbPage = ceil($nbSorties / $maxResults);
         $pagesAafficher = array($pageNumber - 1, $pageNumber + 1, $pageNumber + 2);
         if ($nbPage == 0)

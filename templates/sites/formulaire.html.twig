@@ -1,0 +1,22 @@
+{% extends('base.html.twig') %}
+{% block body %}
+    <div class="container">
+        {{ form_start(siteForm, {'attr': {'class': 'form-inline'}}) }}
+        {{ form_errors(siteForm) }}
+        <div class="col-12">
+            <div class="form-group mb-3 row">
+                <label class="col-2 col-form-label" for="nom_site">Nom
+                    <span class="required">*</span>
+                </label>
+                <div class="col-3">
+                    {{ form_widget(siteForm.nom, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center w-100 d-none d-sm-flex mt-4">
+        {{ form_widget(siteForm.ajouter, {'attr': {'class': 'btn btn-success'} }) }}
+        {{ form_end(siteForm) }}
+    </div>
+
+{% endblock %}

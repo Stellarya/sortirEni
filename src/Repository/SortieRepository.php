@@ -37,20 +37,19 @@ class SortieRepository extends ServiceEntityRepository
      * @param $numPage
      * @return int|mixed|string
      */
-    public function findSortiesParSite($siteID, $resultatsMax, $numPage){
+    public function findSortiesParSite($siteID){
         $qb = $this->createQueryBuilder('s');
         $qb->join('s.etat', 'e')
-            ->where($qb->expr()->eq('e.id', '2'))
+            ->where($qb->expr()->eq('e.libelle', '?2'))
+            ->orWhere($qb->expr()->eq('e.libelle', '?3'))
             ->join('s.site', 'si')
             ->andWhere($qb->expr()->eq('si.id', '?1'))
+            ->addCriteria($this->criteria)
         ;
         $query = $qb->getQuery()
-            ->setParameter(1, $siteID);
-
-        return $query->getResult();
-
-        $firstResult = ($numPage - 1) * $resultatsMax;
-        $query->setFirstResult($firstResult)->setMaxResults($resultatsMax);
+            ->setParameter(1, $siteID)
+            ->setParameter(2, "Ouverte")
+            ->setParameter(3, "Clôturée");
 
         return $query->getResult();
     }
@@ -60,9 +59,13 @@ class SortieRepository extends ServiceEntityRepository
         try {
             $qb = $this->createQueryBuilder('s');
             $qb->join('s.etat', 'e')
-                ->where($qb->expr()->eq('e.id', '2'))
+                ->where($qb->expr()->eq('e.libelle', '?2'))
+                ->orWhere($qb->expr()->eq('e.libelle', '?3'))
                 ->select('count(s.id)');
-            return $qb->getQuery()->getSingleScalarResult();
+            $query = $qb->getQuery()
+                ->setParameter(2, "Ouverte")
+                ->setParameter(3, "Clôturée");
+            return $query->getSingleScalarResult();
         } catch (NoResultException | NonUniqueResultException $e) {
             return 0;
         }
@@ -78,11 +81,17 @@ class SortieRepository extends ServiceEntityRepository
         $qb->join('s.organisateur', 'o')
             ->join('s.etat', 'e')
             ->where($qb->expr()->eq('o.id', $id))
-            ->andWhere($qb->expr()->eq('e.id', '2'))
+            ->andWhere($qb->expr()->eq('e.libelle', '?2'))
+            ->orWhere($qb->expr()->eq('e.libelle', '?3'))
+            ->orWhere($qb->expr()->eq('e.libelle', '?4'))
+            ->addCriteria($this->criteria)
              ;
 
-        $query = $qb->getQuery();
-
+        $query = $qb->getQuery()
+            ->setParameter(2, "Ouverte")
+            ->setParameter(3, "Clôturée")
+            ->setParameter(4, "Créée")
+        ;
         return $query->getResult();
     }
 
@@ -94,9 +103,15 @@ class SortieRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('s');
         $qb->where($qb->expr()->like('s.nom', '?1'))
+            ->join('s.etat', 'e')
+            ->andWhere($qb->expr()->eq('e.libelle', '?2'))
+            ->orWhere($qb->expr()->eq('e.libelle', '?3'))
+            ->addCriteria($this->criteria)
              ;
         $query = $qb->getQuery();
-        $query->setParameter(1, '%'.$texte.'%');
+        $query->setParameter(1, '%'.$texte.'%')
+            ->setParameter(2, "Ouverte")
+            ->setParameter(3, "Clôturée");
         return $query->getResult();
     }
 
@@ -110,10 +125,16 @@ class SortieRepository extends ServiceEntityRepository
         var_dump($dateDebut->format('Y-m-d H:i:s'), $dateFin->format('Y-m-d H:i:s'));
         $qb = $this->createQueryBuilder('s');
         $qb->where($qb->expr()->gte('s.dateHeureDebut', '?1'))
-            ->andWhere($qb->expr()->lte('s.dateHeureDebut', '?2'));
+            ->andWhere($qb->expr()->lte('s.dateHeureDebut', '?2'))
+            ->join('s.etat', 'e')
+            ->andWhere($qb->expr()->eq('e.libelle', '?3'))
+            ->orWhere($qb->expr()->eq('e.libelle', '?4'))
+            ->addCriteria($this->criteria);
         $query = $qb->getQuery();
         $query->setParameter(1, $dateDebut->format('Y-m-d H:i:s'));
-        $query->setParameter(2, $dateFin->format('Y-m-d H:i:s'));
+        $query->setParameter(2, $dateFin->format('Y-m-d H:i:s'))
+            ->setParameter(3, "Ouverte")
+            ->setParameter(4, "Clôturée");;
         return $query->getResult();
     }
 
@@ -125,9 +146,15 @@ class SortieRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('s');
         $qb->where($qb->expr()->gte('s.dateHeureDebut', '?1'))
+            ->join('s.etat', 'e')
+            ->andWhere($qb->expr()->eq('e.libelle', '?2'))
+            ->orWhere($qb->expr()->eq('e.libelle', '?3'))
+            ->addCriteria($this->criteria)
              ;
         $query = $qb->getQuery();
-        $query->setParameter(1, $dateDebut->format('Y-m-d H:i:s'));
+        $query->setParameter(1, $dateDebut->format('Y-m-d H:i:s'))
+            ->setParameter(2, "Ouverte")
+            ->setParameter(3, "Clôturée");
         return $query->getResult();
     }
 
@@ -139,9 +166,15 @@ class SortieRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('s');
         $qb->where($qb->expr()->lte('s.dateHeureDebut', '?1'))
+            ->join('s.etat', 'e')
+            ->andWhere($qb->expr()->eq('e.libelle', '?2'))
+            ->orWhere($qb->expr()->eq('e.libelle', '?3'))
+            ->addCriteria($this->criteria)
              ;
         $query = $qb->getQuery();
-        $query->setParameter(1, $dateFin->format('Y-m-d H:i:s'));
+        $query->setParameter(1, $dateFin->format('Y-m-d H:i:s'))
+            ->setParameter(2, "Ouverte")
+            ->setParameter(3, "Clôturée");
         return $query->getResult();
     }
 
@@ -153,9 +186,13 @@ class SortieRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('s');
         $qb->where($qb->expr()->lt('s.dateHeureDebut', '?1'))
+            ->join('s.etat', 'e')
+            ->andWhere($qb->expr()->eq('e.libelle', '?2'))
+            ->addCriteria($this->criteria)
              ;
         $query = $qb->getQuery();
-        $query->setParameter(1, $date);
+        $query->setParameter(1, $date)
+            ->setParameter(2, "Activité terminée");
         return $query->getResult();
     }
 
@@ -169,9 +206,14 @@ class SortieRepository extends ServiceEntityRepository
         $qb->join('s.participants', 'p')
             ->join('s.etat', 'e')
             ->where($qb->expr()->eq('p.id', $id))
-            ->andWhere($qb->expr()->eq('e.id', '2'))
+            ->andWhere($qb->expr()->eq('e.libelle', '?2'))
+            ->orWhere($qb->expr()->eq('e.libelle', '?3'))
+            ->addCriteria($this->criteria)
              ;
-        return $qb->getQuery()->getResult();
+        $query = $qb->getQuery()
+            ->setParameter(2, "Ouverte")
+            ->setParameter(3, "Clôturée");
+        return $query->getResult();
     }
 
     /**
@@ -182,17 +224,25 @@ class SortieRepository extends ServiceEntityRepository
     {
         $dql = "SELECT s
                 FROM App\Entity\Sortie s
-                WHERE s.id NOT IN (
+                WHERE s.etat IN (
+                    SELECT et
+                    FROM App\Entity\Etat et
+                    WHERE et.libelle = ?2
+                    OR et.libelle = ?3)
+                AND s.id NOT IN (
                     SELECT so
                     FROM App\Entity\Sortie so
                     JOIN so.participants pa
-                    WHERE pa.id = ?1
+                    WHERE pa.id = ?1)
                 ORDER BY s.dateHeureDebut DESC
-                )";
+                ";
 
         $em = $this->getEntityManager();
         $query = $em->createQuery($dql);
-        $query->setParameter(1, $id);
+        $query->setParameter(1, $id)
+            ->setParameter(2, "Ouverte")
+            ->setParameter(3, "Clôturée")
+        ;
 
         return $query->getResult();
     }
@@ -204,6 +254,7 @@ class SortieRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('s');
         $qb->join('s.etat', 'e')
             ->where($qb->expr()->eq('e.id', '2'))
+            ->addCriteria($this->criteria)
              ;
         return $qb->getQuery()->getResult();
     }

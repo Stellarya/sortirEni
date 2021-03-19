@@ -1,0 +1,29 @@
+{% extends('base.html.twig') %}
+{% block body %}
+    <div class="container">
+        {{ form_start(villeForm, {'attr': {'class': 'form-inline'}}) }}
+        {{ form_errors(villeForm) }}
+        <div class="col-12">
+            <div class="form-group mb-3 row">
+                <label class="col-2 col-form-label" for="nom_ville">Nom
+                    <span class="required">*</span>
+                </label>
+                <div class="col-3">
+                    {{ form_widget(villeForm.nom, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="col-1"></div>
+                <label class="col-2 col-form-label" for="cp_ville">Code Postal<span class="required">*</span>
+                </label>
+                <div class="col-3">
+                    {{ form_widget(villeForm.codePostal, {'attr': {'class': 'form-control'}}) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-center w-100 d-none d-sm-flex mt-4">
+        {{ form_widget(villeForm.ajouter, {'attr': {'class': 'btn btn-success'} }) }}
+        {{ form_end(villeForm) }}
+    </div>
+    </div>
+
+{% endblock %}

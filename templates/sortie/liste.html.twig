@@ -3,9 +3,16 @@
 {% block body %}
 
     <div class="container">
-        <h1>{{ title }}</h1>
 
-        <button type="button" class="btn btn-primary mb-3" data-toggle="collapse" data-target="#filtres">Afficher les filtres</button>
+        {% form_theme form 'bootstrap_4_horizontal_layout.html.twig' %}
+        <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-primary mb-3" data-toggle="collapse" data-target="#filtres">Afficher
+                les filtres
+            </button>
+            {% if not isMobile %}
+                <a href="{{ path('page_formulaire_sortie', {'id' : -1}) }}" class="btn btn-primary mb-3">Créer une nouvelle sortie</a>
+            {% endif %}
+        </div>
         <div id="filtres" class="collapse">
             {{ form_start(form) }}
             {{ form_widget(form) }}
@@ -13,29 +20,33 @@
         </div>
 
         {% if sorties|length == 0 %}
-        <div class="row mt-3">
-            <div class="col-sm-3 d-flex align-items-stretch">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Aucune sortie</h5>
-                        <p class="card-text">
-                            Il n'y a pas de sortie sur ce site avec ces filtres
-                        </p>
+            <div class="row mt-3">
+                <div class="col-sm-3 d-flex align-items-stretch">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Aucune sortie</h5>
+                            <p class="card-text">
+                                Il n'y a pas de sortie sur ce site avec ces filtres
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         {% endif %}
         <div class="row mt-3">
             <!--<div class="card-columns align-items-stretch">-->
-        {% for sortie in sorties %}
-            <div class="col-sm-3 d-flex align-items-stretch">
-                    <div class="card">
-                        {% if sortie.id is divisible by (2) %}
-                            <img class="card-img-top" src="{{ asset("images/thabor.jpg") }}" alt="Card image cap">
-                        {% else %}
-                            <img class="card-img-top" src="{{ asset("images/thabor2.jpg") }}" alt="Card image cap">
-                        {% endif %}
+            {% for sortie in sorties %}
+                <div class="col-12 col-lg-6 col-xl-3 d-flex align-items-stretch">
+                    <div class="card mb-3">
+                        <div class="height100">
+                            {% if sortie.id is divisible by (2) %}
+                                <img class="card-img-top image_details" src="{{ asset("images/thabor.jpg") }}"
+                                     alt="Card image cap">
+                            {% else %}
+                                <img class="card-img-top image_details" src="{{ asset("images/thabor2.jpg") }}"
+                                     alt="Card image cap">
+                            {% endif %}
+                        </div>
 
                         <div class="card-body">
                             <h5 class="card-title">{{ sortie.nom }}</h5>
@@ -50,11 +61,12 @@
                             </p>
 
                         </div>
-                        <a href="{{ path('page_details_sortie', {'id' : sortie.id}) }}" class="btn btn-secondary">Plus d'informations</a>
+                        <a href="{{ path('page_details_sortie', {'id' : sortie.id, 'pageNumber' : pageNumber}) }}"
+                           class="btn btn-secondary">Plus d'informations</a>
                     </div>
-            </div>
-        {% endfor %}
-        <!-- </div> -->
+                </div>
+            {% endfor %}
+            <!-- </div> -->
         </div>
         <br>
 
@@ -63,15 +75,18 @@
                 <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
             {% else %}
                 <li class="page-item"><a href="{{ path('page_sortie', {'pageNumber' : pageNumber-1}) }}"
-                                                   class="page-link">Previous</a></li>
+                                         class="page-link">Previous</a></li>
             {% endif %}
 
             {% for i in 1..ideaCountPage %}
                 {% if i == pageNumber %}
-                    <li class="page-item active"><a class="page-link" href="{{ path('page_sortie', {'pageNumber' : i}) }}">{{ i }}</a></li>
+                    <li class="page-item active"><a class="page-link"
+                                                    href="{{ path('page_sortie', {'pageNumber' : i}) }}">{{ i }}</a>
+                    </li>
                 {% else %}
                     {% if (i == 1 or i == 2 or i == ideaCountPage or i == ideaCountPage - 1) %}
-                        <li class="page-item"><a href="{{ path('page_sortie', {'pageNumber' : i}) }}" class="page-link">{{ i }}</a>
+                        <li class="page-item"><a href="{{ path('page_sortie', {'pageNumber' : i}) }}"
+                                                 class="page-link">{{ i }}</a>
                         </li>
                     {% elseif (i == firstEllipsis or i == secondEllipsis) %}
                         <li class="page-item disabled"><a class="page-link" href="#">...</a></li>
@@ -106,12 +121,14 @@
                                 <option value="{{ i }}">{{ i }}</option>
                             {% endif %}
                         {% endfor %}
-                        </select>
+                    </select>
                 </label>
                 <input type="submit" class="btn btn-primary ml-3" name="Connexion" value="Appliquer">
             </form>
         </ul>
         <br>
-        <a href="{{ path('page_formulaire_sortie', {'id' : -1}) }}" class="btn btn-primary">Créer une nouvelle sortie</a>
+        <div class="d-none d-md-block ">
+
+        </div>
     </div>
 {% endblock %}

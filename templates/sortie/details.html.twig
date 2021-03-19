@@ -1,7 +1,7 @@
 {% extends('base.html.twig') %}
 {% block body %}
     <div class="container-fluid">
-        <a href="{{ path('page_sortie') }}"
+        <a href="{{ path('page_sortie', {'pageNumber' : pageNumber}) }}"
            class="btn btn-primary m-2">Retourner à la liste des sorties</a>
         <div class="card mb-3 mt-5">
             <div class="row g-0">

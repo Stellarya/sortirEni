@@ -32,7 +32,10 @@
         {% include "messages.html.twig" %}
 
         <div class="container">
-        {% block body %}{% endblock %}
+            <div class="alert alert-light sortir-box">
+                <h1>{{ title }}</h1>
+            </div>
+            {% block body %}{% endblock %}
         </div>
         {% block javascripts %}
             <!-- bootstrap 4 -->

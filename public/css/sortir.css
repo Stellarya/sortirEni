@@ -29,6 +29,14 @@ h1, h2, h3, h4, h5 {
     border-color: var(--contrast-color) !important;
 }
 
+.width_22px {
+    width: 22px !important;
+}
+
+.height100 {
+    height: 100px;
+}
+
 /* NAVIGATION -------------------------------------------------------------------------------------------------------*/
 .navbar-light .navbar-nav .nav-item a.nav-link, #navbarSupportedContent .navbar-nav.user_nav span.nav-link{
     color: var(--primary-color);
@@ -47,4 +55,12 @@ h1, h2, h3, h4, h5 {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+.sortir-box {
+    border-radius: 5px;
+    -webkit-box-shadow: 0 1px 20px 0 rgba(69, 90, 100, 0.08);
+    box-shadow: 0 1px 20px 0 rgba(69, 90, 100, 0.08);
+    border: none;
+    margin-bottom: 30px;
 }

@@ -21,11 +21,12 @@
                         <i class="fas fa-cog mr-2"></i>Administration
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Villes</a>
-                        <a class="dropdown-item" href="#">Sites</a>
-                        <a class="dropdown-item" href="{{ path('admin_users_list') }}">Liste des utilisateurs</a>
-                        <a class="dropdown-item" href="{{ path('admin_users') }}">Inscription utilisateur</a>
-                        <a class="dropdown-item" href="{{ path('admin_users_import') }}">Import liste utilisateur</a>
+                        <a class="dropdown-item" href="{{ path('villes_list') }}"><i class="fas fa-city mr-2 width_22px" ></i>Villes</a>
+                        <a class="dropdown-item" href="{{ path('sites_list') }}"><i class="fas fa-map-marked-alt mr-2 width_22px"></i>Sites</a>
+                        <a class="dropdown-item" href="{{ path('lieux_list') }}"><i class="fas fa-map-marker-alt mr-2 width_22px"></i>Lieux</a>
+                        <a class="dropdown-item" href="{{ path('admin_users_list') }}"><i class="fas fa-users mr-2 width_22px"></i>Liste des utilisateurs</a>
+                        <a class="dropdown-item" href="{{ path('admin_users') }}"><i class="fas fa-user-plus mr-2 width_22px"></i>Inscription utilisateur</a>
+                        <a class="dropdown-item" href="{{ path('admin_users_import') }}"><i class="fas fa-file-import mr-2 width_22px"></i>Import liste utilisateur</a>
                     </div>
                 </li>
             {% endif %}
@@ -36,7 +37,7 @@
                     <span class="nav-link"><i class="fas fa-user"></i> {{ app.user.username }}</span>
                 </li>
                 <li class="nav-item mr-3">
-                    <a class="nav-link" href="{{ path('profile_view') }}">Mon Profil</a>
+                    <a class="nav-link" href="{{ path('profile_view') }}"><i class="fas fa-user-circle mr-2"></i>Mon Profil</a>
                 </li>
                 <li class="nav-item  mr-3">
                     <a class="nav-link" href="{{ path('app_logout') }}"><i class="fas fa-user-times mr-2"></i>Déconnexion</a>
