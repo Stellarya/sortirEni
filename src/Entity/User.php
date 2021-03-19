@@ -45,7 +45,7 @@ class User implements UserInterface, \Serializable
     private $participant;
 
     /**
-     * @ORM\Column(type="string", length=1000)
+     * @ORM\Column(type="string", length=1000, nullable=true)
      */
     private $avatar;
 

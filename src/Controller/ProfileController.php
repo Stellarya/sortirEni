@@ -113,6 +113,10 @@ class ProfileController extends AbstractController
                     $this->getDoctrine()->getConnection()->rollback();
                     $this->addFlash("alert", $e->getMessage());
                 }
+            } else {
+                foreach($form->getErrors(true) as $e) {
+                    $this->addFlash("alert", $e->getMessage());
+                }
             }
         }
 
