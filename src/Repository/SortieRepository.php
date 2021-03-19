@@ -179,19 +179,19 @@ class SortieRepository extends ServiceEntityRepository
     }
 
     /**
-     * @param $date
      * @return Sortie[] Returns an array of Sortie objects
+     * @throws QueryException
      */
-    public function findSortiesParDatePassee($date): array
+    public function findSortiesParDatePassee(): array
     {
         $qb = $this->createQueryBuilder('s');
-        $qb->where($qb->expr()->lt('s.dateHeureDebut', '?1'))
+        $qb
             ->join('s.etat', 'e')
             ->andWhere($qb->expr()->eq('e.libelle', '?2'))
             ->addCriteria($this->criteria)
              ;
         $query = $qb->getQuery();
-        $query->setParameter(1, $date)
+        $query
             ->setParameter(2, "Activité terminée");
         return $query->getResult();
     }

@@ -25,6 +25,16 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 class SortieController extends AbstractController
 {
     public $siteID = null;
+    public const ETAT_COULEURS = [
+        'Ouverte' => '#038E59',
+        'Clôturée' => '#0B0404',
+        'Créée' => '#ECC330',
+        'Activité en cours' => '#FF8029',
+        'Passée' => '#283671',
+        'Annulée' => '#B83026',
+        'Activité terminée' => '#283671',
+        'Activité historisée' => '#E866A6',
+    ];
 
     /**
      * @Route("/sortie/{pageNumber}", name="page_sortie")
@@ -134,7 +144,8 @@ class SortieController extends AbstractController
                     'secondEllipsis' => $pageNumber + 3,
                     'maxResults' => $maxResults,
                     'form' => $form->createView(),
-                    'title' => "Liste des sorties"
+                    'title' => "Liste des sorties",
+                    'couleurs' => self::ETAT_COULEURS
                 ]
             );
         }
@@ -299,6 +310,7 @@ class SortieController extends AbstractController
      * @param Request $request
      * @param SortieRepository $sortieRepository
      * @param ParticipantRepository $participantRepository
+     * @param int $id
      * @return RedirectResponse
      */
     public function desinscriptionSortie(Request $request,
@@ -423,9 +435,7 @@ class SortieController extends AbstractController
         }
 
         if ($estSortiePassee) {
-            $dateJour = new DateTime('NOW');
-            $date = date_format($dateJour, "Y-m-d G:i:s");
-            $sortiesConcernees = $sortieRepository->findSortiesParDatePassee($date);
+            $sortiesConcernees = $sortieRepository->findSortiesParDatePassee();
             $sorties = $this->ajoutUniqueAuTableau($sortiesConcernees, $sorties);
         }
 
