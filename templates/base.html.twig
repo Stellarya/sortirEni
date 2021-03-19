@@ -25,12 +25,12 @@
     <body>
         <!-- NAVBAR -->
         {% include "navbar.html.twig" %}
-        {% include "messages.html.twig" %}
 
         <div class="container">
             <div class="alert alert-light sortir-box">
                 <h1>{{ title }}</h1>
             </div>
+            {% include "messages.html.twig" %}
             {% block body %}{% endblock %}
         </div>
         {% block javascripts %}

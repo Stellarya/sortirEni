@@ -33,8 +33,10 @@
 }
 
 .bg-c-lite-green {
-    background: -webkit-gradient(linear, left top, right top, from(#f29263), to(#ee5a6f));
-    background: linear-gradient(to right, #ee5a6f, #f29263)
+    /*background: -webkit-gradient(linear, left top, right top, from(#f29263), to(#ee5a6f));
+    background: linear-gradient(to right, #ee5a6f, #f29263);*/
+    background: -webkit-gradient(linear, left top, right top, from(var(--secondary-color)), to(var(--light-blue-color)));
+    background: linear-gradient(to right, #705aee, #6393f2);
 }
 
 .user-profile {
@@ -50,7 +52,8 @@
 }
 
 .img-radius {
-    border-radius: 50%
+    border-radius: 50%;
+    /*border: 3px solid white;*/
 }
 
 h6 {
