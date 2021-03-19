@@ -21,11 +21,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-
+use Mobile_Detect;
 
 class SortieController extends AbstractController
 {
     public $siteID = null;
+
 
     /**
      * @Route("/sortie/{pageNumber}", name="page_sortie")
@@ -44,6 +45,7 @@ class SortieController extends AbstractController
                           int $pageNumber = 1): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $detect = new Mobile_Detect();
 
         $maxResults = $session->get("maxResult");
         if (!isset($maxResults)) {
@@ -135,6 +137,7 @@ class SortieController extends AbstractController
                     'secondEllipsis' => $pageNumber + 3,
                     'maxResults' => $maxResults,
                     'form' => $form->createView(),
+                    'isMobile' => $detect->isMobile(),
                     'title' => "Liste des sorties"
                 ]
             );
@@ -231,9 +234,9 @@ class SortieController extends AbstractController
      * @throws \Doctrine\DBAL\Exception
      */
     public function detailSortie(SortieRepository $sortieRepository,
-        ParticipantRepository $participantRepository,
-        int $id = null,
-        int $pageNumber = 1): Response
+                                 ParticipantRepository $participantRepository,
+                                 int $id = null,
+                                 int $pageNumber = 1): Response
     {
         $sortie = $sortieRepository->find($id);
         $nom = $sortie->getNom();
