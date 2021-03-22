@@ -3,7 +3,7 @@
     <div class="container-fluid">
         <a href="{{ path('page_sortie', {'pageNumber' : pageNumber}) }}"
            class="btn btn-primary m-2">Retourner à la liste des sorties</a>
-        <div class="card mb-3 mt-5">
+        <div class="card mb-3 mt-2">
             <div class="row g-0">
                 <div class="col-md-4">
                     {% if sortie.id is divisible by (2) %}
@@ -34,19 +34,38 @@
                                 </div>
                             </div>
                             <h5>Participants</h5>
-                            <table class="table">
+                            <table id="datatable_participant">
                                 <thead>
                                 <tr>
-                                    <th scope="col">Prenom</th>
-                                    <th scope="col">Nom</th>
+                                    <th class="d-none">ID</th>
+                                    <th>Prenom</th>
+                                    <th>Nom</th>
+                                    <th></th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {% if participants is not empty and participants is not null %}
                                     {% for participant in participants %}
                                         <tr>
+                                            <td class="d-none">{{ app.user.participant.id }}</td>
                                             <td>{{ participant.prenom }}</td>
                                             <td>{{ participant.nom }}</td>
+                                            {% if participant.id == userActuel.id %}
+                                                <td class="d-flex flex-row-reverse">
+                                                    <a href="{{ path('profile_view') }}"
+                                                       type="button" class="btn btn-primary btn_modifier mr-2">
+                                                        <i class="fas fa-user-circle"></i> Voir mon profil
+                                                    </a>
+                                                </td>
+                                            {% else %}
+                                                <td class="d-flex flex-row-reverse">
+                                                    <a href="{{ path('profile_view', {'id' : tUserParticipant[participant.id]}) }}"
+                                                       type="button" class="btn btn-primary btn_modifier mr-2">
+                                                        <i class="fas fa-user-circle"></i> Voir le profil
+                                                    </a>
+                                                </td>
+                                            {% endif %}
+
                                         </tr>
                                     {% endfor %}
                                 {% else %}
@@ -58,10 +77,7 @@
                             </table>
 
                         </div>
-
-
-                        {# <iframe width="500" height="300" src="https://api.maptiler.com/maps/streets/?key=yn4AvBK0PIrhfTz3GmKm#15/{{ sortie.lieu.latitude }}/{{ sortie.lieu.longitude }}"></iframe>#}
-                        <div class="card-text d-flex justify-content-between">
+                        <div class="card-text d-flex justify-content-between mt-3">
                             {% if peutSinscrire %}
                                 <form action="{{ path('page_inscription_sortie', {'id' : sortie.id}) }}"
                                       method="post" class="mr-2">
@@ -156,6 +172,8 @@
             var marker = L.marker([{{ sortie.lieu.latitude }}, {{ sortie.lieu.longitude }}]).addTo(map);
         </script>
     </div>
-
+    <script>
+        $datatable = $("#datatable_participant").DataTable();
+    </script>
 {% endblock %}
 
