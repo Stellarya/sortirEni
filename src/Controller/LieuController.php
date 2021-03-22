@@ -67,9 +67,9 @@ class LieuController extends AbstractController
             $em->persist($oLieu);
             $em->flush();
             if (-1 == $id) {
-                $this->addFlash("success", "Lieu créée avec succès !");
+                $this->addFlash("success", "Lieu créé avec succès !");
             } else {
-                $this->addFlash("success", "Lieu modifiée avec succès !");
+                $this->addFlash("success", "Lieu modifié avec succès !");
             }
 
             return $this->redirectToRoute('lieux_list');
