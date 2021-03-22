@@ -302,6 +302,7 @@ class SortieController extends AbstractController
                 'peutSinscrire' => $droits['peutSinscrire'],
                 'peutSeDesinscrire' => $droits['peutSeDesinscrire'],
                 'peutModifier' => $droits['peutModifier'],
+                'peutPublier' => $droits['peutPublier'],
                 'peutAnnuler' => $droits['peutAnnuler']
             ]
         );
@@ -320,6 +321,7 @@ class SortieController extends AbstractController
         $peutSinscrire = $this->peutSinscrire($nomEtat)  && !$utilisateurPresent;
         $peutSeDesinscrire = $this->peutSeDesinscrire($nomEtat) && $utilisateurPresent;
         $peutModifier = $this->peutModifier($user, $sortie);
+        $peutPublier = $this->peutPublier($user, $sortie);
         $peutAnnuler = $this->peutAnnuler($user, $sortie);
 
 
@@ -327,6 +329,7 @@ class SortieController extends AbstractController
             'peutSinscrire' => $peutSinscrire,
             'peutSeDesinscrire' => $peutSeDesinscrire,
             'peutModifier' => $peutModifier,
+            'peutPublier' => $peutPublier,
             'peutAnnuler' => $peutAnnuler,
         );
     }
@@ -348,6 +351,25 @@ class SortieController extends AbstractController
         {
             return false;
         }
+        return true;
+    }
+
+    /**
+     * @param Participant $user
+     * @param Sortie $sortie
+     * @return bool
+     */
+    public function peutPublier (Participant $user, Sortie $sortie) : bool
+    {
+        $nomEtat = $sortie->getEtat()->getLibelle();
+        if ($nomEtat != 'Créée')
+        {
+            return false;
+        }
+        if($this->estAdmin())
+            return true;
+        if(!$this->estOrganisateur($user, $sortie))
+            return false;
         return true;
     }
 
