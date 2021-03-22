@@ -167,11 +167,20 @@ class SortieController extends AbstractController
      */
     public function ajoutUniqueAuTableau(array $sortiesConcernees, array $sorties): array
     {
-        foreach ($sortiesConcernees as $sortie) {
-            if (!in_array($sortie, $sorties) && $sortie->getSite()->getId() == $this->siteID) {
-                $sorties[] = $sortie;
+        if (count($sorties) == 0)
+        {
+            $sorties = $sortiesConcernees;
+        } else
+        {
+            $sortiesTemp = [];
+            foreach ($sortiesConcernees as $sortie) {
+                if (in_array($sortie, $sorties) && $sortie->getSite()->getId() == $this->siteID) {
+                    $sortiesTemp[] = $sortie;
+                }
             }
+            $sorties = $sortiesTemp;
         }
+
 
         return $sorties;
     }
