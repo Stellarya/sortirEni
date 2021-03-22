@@ -50,9 +50,15 @@ class Participant
      */
     private $estInscrit;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Groupe::class, inversedBy="participants")
+     */
+    private $groupes;
+
     public function __construct()
     {
         $this->estInscrit = new ArrayCollection();
+        $this->groupes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -141,6 +147,22 @@ class Participant
     public function removeEstInscrit(Sortie $estInscrit): self
     {
         $this->estInscrit->removeElement($estInscrit);
+
+        return $this;
+    }
+
+    public function addGroupe(Groupe $groupe): self
+    {
+        if (!$this->groupes->contains($groupe)) {
+            $this->groupes[] = $groupe;
+        }
+
+        return $this;
+    }
+
+    public function removeGroupe(Groupe $groupe): self
+    {
+        $this->groupes->removeElement($groupe);
 
         return $this;
     }
