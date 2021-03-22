@@ -28,12 +28,6 @@ class LieuController extends AbstractController
     {
         $toLieu = $lieuRepository->findAll();
 
-        foreach ($toLieu as $oLieu) {
-            $latitude = ($oLieu->getLatitude()) ? : '-';
-            $longitude = ($oLieu->getLongitude()) ? : '-';
-            $rue = ($oLieu->getRue()) ? : '-';
-        }
-
         return $this->render('lieux/listeLieu.html.twig', [
             'title' => 'Liste des Lieux',
             'lieux' => $toLieu

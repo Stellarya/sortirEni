@@ -256,25 +256,20 @@ class SortieController extends AbstractController
     /**
      * @Route("/sortie/detail/{id}/{pageNumber}", name="page_details_sortie", requirements={"id": "\d+"})
      * @param SortieRepository $sortieRepository
-     * @param ParticipantRepository $participantRepository
      * @param UserRepository $userRepository
      * @param int|null $id
      * @param int $pageNumber
      * @return Response
-     * @throws Exception
-     * @throws \Doctrine\DBAL\Exception
      */
     public function detailSortie(SortieRepository $sortieRepository,
-        ParticipantRepository $participantRepository,
-        UserRepository $userRepository,
-        int $id = null,
-        int $pageNumber = 1): Response
+                                 UserRepository $userRepository,
+                                 int $id = null,
+                                 int $pageNumber = 1): Response
     {
         $sortie = $sortieRepository->find($id);
 
         $nom = $sortie->getNom();
         $lieu = $sortie->getLieu();
-        $participants = $sortie->getParticipants();
         $user = $userRepository->findOneBy(["username" => $this->getUser()->getUsername()])->getParticipant();
 
         $droits = $this->droits($user, $sortie);
@@ -284,7 +279,12 @@ class SortieController extends AbstractController
         $latitude = ($lieu->getLatitude()) ?: '-';
         $longitude = ($lieu->getLongitude() ?: '-');
 
-        $tParticipants = $sortie->getParticipants();
+        $toParticipants = $sortie->getParticipants();
+        $tUserParticipant = array();
+        foreach ($toParticipants as $oParticipant){
+            $userParticipant = $userRepository->findOneBy(["participant" => $oParticipant->getId()]);
+            $tUserParticipant[$oParticipant->getId()] = $userParticipant->getId();
+        }
 
         return $this->render('sortie/details.html.twig', [
                 "sortie" => $sortie,
@@ -294,9 +294,10 @@ class SortieController extends AbstractController
                 'dateHeure' => date('d/m/Y', $dateHeure) . ' à ' . date('H:m', $dateHeure),
                 'dateLimite' => date('d/m/Y', $dateLimiteInscription),
                 'latitude' => $latitude,
+                'userActuel' => $user,
+                'tUserParticipant' => $tUserParticipant,
                 'longitude' => $longitude,
-                'participants' => $tParticipants,
-                'tIdParticipants' => $participants,
+                'participants' => $toParticipants,
                 'pageNumber' => $pageNumber,
                 'peutSinscrire' => $droits['peutSinscrire'],
                 'peutSeDesinscrire' => $droits['peutSeDesinscrire'],

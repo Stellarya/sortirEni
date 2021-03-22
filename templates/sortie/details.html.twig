@@ -34,19 +34,38 @@
                                 </div>
                             </div>
                             <h5>Participants</h5>
-                            <table class="table">
+                            <table id="datatable_participant">
                                 <thead>
                                 <tr>
-                                    <th scope="col">Prenom</th>
-                                    <th scope="col">Nom</th>
+                                    <th class="d-none">ID</th>
+                                    <th>Prenom</th>
+                                    <th>Nom</th>
+                                    <th></th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {% if participants is not empty and participants is not null %}
                                     {% for participant in participants %}
                                         <tr>
+                                            <td class="d-none">{{ app.user.participant.id }}</td>
                                             <td>{{ participant.prenom }}</td>
                                             <td>{{ participant.nom }}</td>
+                                            {% if participant.id == userActuel.id %}
+                                                <td class="d-flex flex-row-reverse">
+                                                    <a href="{{ path('profile_view') }}"
+                                                       type="button" class="btn btn-primary btn_modifier mr-2">
+                                                        <i class="fas fa-user-circle"></i> Voir mon profil
+                                                    </a>
+                                                </td>
+                                            {% else %}
+                                                <td class="d-flex flex-row-reverse">
+                                                    <a href="{{ path('profile_view', {'id' : tUserParticipant[participant.id]}) }}"
+                                                       type="button" class="btn btn-primary btn_modifier mr-2">
+                                                        <i class="fas fa-user-circle"></i> Voir le profil
+                                                    </a>
+                                                </td>
+                                            {% endif %}
+
                                         </tr>
                                     {% endfor %}
                                 {% else %}
@@ -57,7 +76,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="card-text d-flex justify-content-between">
+                        <div class="card-text d-flex justify-content-between mt-3">
                             {% if peutSinscrire %}
                                 <form action="{{ path('page_inscription_sortie', {'id' : sortie.id}) }}"
                                       method="post" class="mr-2">
@@ -136,4 +155,7 @@
             </div>
         </div>
     </div>
+    <script>
+        $datatable = $("#datatable_participant").DataTable();
+    </script>
 {% endblock %}
