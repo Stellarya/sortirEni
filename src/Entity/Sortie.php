@@ -50,6 +50,7 @@ class Sortie
 
     /**
      * @Assert\NotBlank(message="Merci de renseigner une date limite d'inscription.")
+     * @Assert\LessThanOrEqual(propertyPath="dateHeureDebut")
      * @ORM\Column(type="datetime")
      */
     private $dateLimiteInscription;
@@ -109,7 +110,6 @@ class Sortie
     private $organisateur;
 
     /**
-     * @Assert\NotBlank(message="Merci de renseigner un message d'annulation.")
      * @Assert\Length(
      *     min="2", max="255",
      *     minMessage="2 caractères minimum.",
