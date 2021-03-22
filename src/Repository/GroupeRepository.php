@@ -23,20 +23,24 @@ class GroupeRepository extends ServiceEntityRepository
 
     /**
      * @param Participant $participant
-     * @return int|mixed|string
+     * @return Participant[]
      */
-    public function findByParticipant(Participant $participant) {
-        $query =  $this->createQueryBuilder("g")
-            ->join("g.participants", "p")
-            ->where("p.id", $participant->getId())
+    public function findByParticipant(Participant $participant): array {
+        $query =  $this->createQueryBuilder("g");
+        $query->join("g.participants", "p")
+            ->where($query->expr()->eq('p.id', $participant->getId()))
             ;
         return $query->getQuery()->getResult();
     }
 
-    public function findByOwner(Participant $participant) {
-        $query =  $this->createQueryBuilder("g")
-            ->join("g.owner", "o")
-            ->where("o.id", $participant->getId())
+    /**
+     * @param Participant $participant
+     * @return Participant[]
+     */
+    public function findByOwner(Participant $participant): array {
+        $query =  $this->createQueryBuilder("g");
+        $query->join("g.owner", "o")
+            ->where($query->expr()->eq('o.id', $participant->getId()))
         ;
         return $query->getQuery()->getResult();
     }

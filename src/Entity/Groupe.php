@@ -115,5 +115,11 @@ class Groupe
     }
 
 
+    public function hasParticipant(Participant $participant): bool {
+        return $this->getParticipants()->contains($participant);
+        //return in_array($participant->getId(), array_map(function(Participant $participant) { return $participant->getId(); }, $this->getParticipants()->toArray()));
+    }
+
+
 
 }
