@@ -19,6 +19,15 @@ class Groupe
     private $id;
 
     /**
+     * @ORM\ManyToOne(targetEntity=Participant::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private Participant $owner;
+
+    /** @ORM\Column(type="string", length=255) */
+    private $libelle;
+
+    /**
      * @ORM\ManyToMany(targetEntity=Participant::class, inversedBy="groupes")
      */
     private $participants;
@@ -69,5 +78,42 @@ class Groupe
 
         return $this;
     }
+
+    /**
+     * @return Participant
+     */
+    public function getOwner(): Participant
+    {
+        return $this->owner;
+    }
+
+    /**
+     * @param Participant $owner
+     */
+    public function setOwner(Participant $owner): void
+    {
+        $this->owner = $owner;
+    }
+
+
+
+
+    /**
+     * @return mixed
+     */
+    public function getLibelle()
+    {
+        return $this->libelle;
+    }
+
+    /**
+     * @param mixed $libelle
+     */
+    public function setLibelle($libelle): void
+    {
+        $this->libelle = $libelle;
+    }
+
+
 
 }

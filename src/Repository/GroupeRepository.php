@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Groupe;
+use App\Entity\Participant;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,6 +18,27 @@ class GroupeRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Groupe::class);
+    }
+
+
+    /**
+     * @param Participant $participant
+     * @return int|mixed|string
+     */
+    public function findByParticipant(Participant $participant) {
+        $query =  $this->createQueryBuilder("g")
+            ->join("g.participants", "p")
+            ->where("p.id", $participant->getId())
+            ;
+        return $query->getQuery()->getResult();
+    }
+
+    public function findByOwner(Participant $participant) {
+        $query =  $this->createQueryBuilder("g")
+            ->join("g.owner", "o")
+            ->where("o.id", $participant->getId())
+        ;
+        return $query->getQuery()->getResult();
     }
 
     // /**
