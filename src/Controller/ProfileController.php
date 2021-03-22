@@ -20,6 +20,7 @@ class ProfileController extends AbstractController
     /**
      * @Route("/profile/{id<\d+>?0}", name="profile_view")
      * @param Request $request
+     * @return Response
      */
     public function profile(Request $request, int $id) {
         $this->denyAccessUnlessGranted("IS_AUTHENTICATED_FULLY");
