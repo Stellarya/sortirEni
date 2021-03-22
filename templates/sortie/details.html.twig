@@ -63,7 +63,7 @@
                                       method="post" class="mr-2">
                                     <input type="hidden" value="{{ app.user.participant.id }}"
                                            name="idParticipant">
-                                    <button id="inscription_sortie" type="submit"
+                                    <button type="submit"
                                             class="btn btn-secondary">S'inscrire
                                     </button>
                                 </form>
@@ -73,27 +73,59 @@
                                       method="post"
                                       class="ml-2">
                                     <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
-                                    <button id="desinscription_sortie" type="submit"
+                                    <button type="submit"
                                             class="btn btn-danger">Se désinscrire
                                     </button>
                                 </form>
                             {% endif %}
                             {% if peutAnnuler %}
-                                <form action="{{ path('page_annulation_sortie', {'id' : sortie.id}) }}"
+
+                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#form">
+                                    Annuler la sorie
+                                </button>
+
+                                <div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="annulationModale" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header border-bottom-0">
+                                                <h5 class="modal-title" id="annulationModale">Suppression de la sortie</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <form action="{{ path('page_annulation_sortie', {'id' : sortie.id}) }}"
+                                                  method="post"
+                                                  class="ml-2">
+                                                <div class="modal-body">
+                                                    <label for="motif_annulation">Saisissez un message d'annulation</label>
+                                                    <div class="form-group">
+                                                        <textarea required class="form-control" id="motif_annulation" name="motifAnnulation"></textarea>
+                                                    </div>
+                                                    <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
+                                                </div>
+                                                <div class="modal-footer border-top-0 d-flex justify-content-center">
+                                                    <button type="submit" class="btn btn-danger">Annuler la sortie</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            {% endif %}
+                            {% if peutModifier %}
+                                <form action="{{ path('page_publication_sortie', {'id' : sortie.id}) }}"
                                       method="post"
                                       class="ml-2">
                                     <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
-                                    <button id="annuler_sortie" type="submit"
-                                            class="btn btn-danger">Annuler
+                                    <button type="submit"
+                                            class="btn btn-primary">Publier
                                     </button>
                                 </form>
-                            {% endif %}
-                            {% if peutModifier %}
                                 <form action="{{ path('page_formulaire_sortie', {'id' : sortie.id}) }}"
                                       method="post"
                                       class="ml-2">
                                     <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
-                                    <button id="annuler_sortie" type="submit"
+                                    <button type="submit"
                                             class="btn btn-primary">Modifier
                                     </button>
                                 </form>

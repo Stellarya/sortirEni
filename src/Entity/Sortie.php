@@ -108,6 +108,17 @@ class Sortie
      */
     private $organisateur;
 
+    /**
+     * @Assert\NotBlank(message="Merci de renseigner un message d'annulation.")
+     * @Assert\Length(
+     *     min="2", max="255",
+     *     minMessage="2 caractères minimum.",
+     *     maxMessage="255 caractères maximum."
+     * )
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $messageAnnulation;
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
@@ -275,5 +286,15 @@ class Sortie
         $this->organisateur = $organisateur;
 
         return $this;
+    }
+
+    public function getMessageAnnulation() : ?string
+    {
+        return $this->messageAnnulation;
+    }
+
+    public function setMessageAnnulation($messageAnnulation): void
+    {
+        $this->messageAnnulation = $messageAnnulation;
     }
 }
