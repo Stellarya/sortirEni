@@ -56,7 +56,11 @@
                                 {% endif %}
                                 </tbody>
                             </table>
+
                         </div>
+
+
+                        {# <iframe width="500" height="300" src="https://api.maptiler.com/maps/streets/?key=yn4AvBK0PIrhfTz3GmKm#15/{{ sortie.lieu.latitude }}/{{ sortie.lieu.longitude }}"></iframe>#}
                         <div class="card-text d-flex justify-content-between">
                             {% if peutSinscrire %}
                                 <form action="{{ path('page_inscription_sortie', {'id' : sortie.id}) }}"
@@ -110,9 +114,8 @@
                                         </div>
                                     </div>
                                 </div>
-
                             {% endif %}
-                            {% if peutModifier %}
+                            {% if peutPublier %}
                                 <form action="{{ path('page_publication_sortie', {'id' : sortie.id}) }}"
                                       method="post"
                                       class="ml-2">
@@ -121,6 +124,8 @@
                                             class="btn btn-primary">Publier
                                     </button>
                                 </form>
+                            {% endif %}
+                            {% if peutModifier %}
                                 <form action="{{ path('page_formulaire_sortie', {'id' : sortie.id}) }}"
                                       method="post"
                                       class="ml-2">
@@ -135,5 +140,22 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-12" style="height:300px; padding:0">
+            <div style="" id="map"></div>
+        </div>
+        <script>
+            var map = L.map('map').setView([{{ sortie.lieu.latitude }}, {{ sortie.lieu.longitude }}], 15);
+            L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=yn4AvBK0PIrhfTz3GmKm',{
+                tileSize: 512,
+                zoomOffset: -1,
+                minZoom: 1,
+                attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
+                crossOrigin: true
+            }).addTo(map);
+            var marker = L.marker([{{ sortie.lieu.latitude }}, {{ sortie.lieu.longitude }}]).addTo(map);
+        </script>
     </div>
+
 {% endblock %}
+

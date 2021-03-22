@@ -50,10 +50,10 @@
         $datatable = $("#datatable_lieux").DataTable();
         $(".btn_supprimer").each(function () {
             $(this).click(function () {
-                let url = "{{ path('sites_delete') }}"
+                let url = "{{ path('lieux_delete') }}"
                 url += "/" + $(this).data("id");
                 let btn = $(this);
-                if (confirm("Etes-vous sûr de vouloir supprimer le site ?")) {
+                if (confirm("Etes-vous sûr de vouloir supprimer le lieu ?")) {
                     $.ajax({
                         url: url,
                         method: "POST",
