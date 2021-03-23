@@ -6,10 +6,11 @@
         <div class="card mb-3 mt-2">
             <div class="row g-0">
                 <div class="col-md-4">
-                    {% if sortie.id is divisible by (2) %}
-                        <img class="card-img image_details" src="{{ asset("images/thabor.jpg") }}" alt="Card image cap">
+                    {% if sortie.urlPhoto|length > 0 %}
+                        <img class="card-img-top image_details" src="{{ asset("uploads/urlphoto/") ~ sortie.urlPhoto }}"
+                             alt="Card image cap">
                     {% else %}
-                        <img class="card-img image_details" src="{{ asset("images/thabor2.jpg") }}"
+                        <img class="card-img-top image_details" src="{{ asset("images/pas_image_disponible.png") }}"
                              alt="Card image cap">
                     {% endif %}
                 </div>

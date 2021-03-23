@@ -39,11 +39,11 @@
                 <div class="col-12 col-lg-6 col-xl-3 d-flex align-items-stretch">
                     <div class="card mb-3">
                         <div class="height100">
-                            {% if sortie.id is divisible by (2) %}
-                                <img class="card-img-top image_details" src="{{ asset("images/thabor.jpg") }}"
+                            {% if sortie.urlPhoto|length > 0 %}
+                                <img class="card-img-top image_details" src="{{ asset("uploads/urlphoto/") ~ sortie.urlPhoto }}"
                                      alt="Card image cap">
                             {% else %}
-                                <img class="card-img-top image_details" src="{{ asset("images/thabor2.jpg") }}"
+                                <img class="card-img-top image_details" src="{{ asset("images/pas_image_disponible.png") }}"
                                      alt="Card image cap">
                             {% endif %}
                         </div>

@@ -18,6 +18,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\QueryException;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,6 +26,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Mobile_Detect;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class SortieController extends AbstractController
 {
@@ -193,6 +195,7 @@ class SortieController extends AbstractController
      * @param SortieRepository $sortieRepository
      * @param SiteRepository $siteRepository
      * @param EtatRepository $etatRepository
+     * @param SluggerInterface $slugger
      * @param UserRepository $userRepository
      * @return Response
      */
@@ -201,6 +204,7 @@ class SortieController extends AbstractController
                          SortieRepository $sortieRepository,
                          SiteRepository $siteRepository,
                          EtatRepository $etatRepository,
+                         SluggerInterface $slugger,
                          UserRepository $userRepository): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
@@ -230,6 +234,26 @@ class SortieController extends AbstractController
             if ($sortieForm->get('publier')->isClicked()) {
                 $sortie->setEtat($etatRepository->findOneBy(["libelle" => "Ouverte"]));
             }
+
+            $urlPhoto = $sortieForm["urlPhoto"]->getData();
+            if ($urlPhoto) {
+                $originalFilename = pathinfo($urlPhoto->getClientOriginalName(), PATHINFO_FILENAME);
+                // this is needed to safely include the file name as part of the URL
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$urlPhoto->guessExtension();
+
+                // Move the file to the directory where brochures are stored
+                try {
+                    $urlPhoto->move(
+                        $this->getParameter('urlphoto_directory'),
+                        $newFilename
+                    );
+                    $sortie->setUrlPhoto($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash("alert", $e->getMessage());
+                }
+            }
+
             $user = $userRepository->findOneBy(["username" => $this->getUser()->getUsername()]);
             $site = $siteRepository->findOneBy(["id" => $user->getParticipant()->getEstRattacheA()]);
 
