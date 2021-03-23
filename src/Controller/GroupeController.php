@@ -4,19 +4,130 @@ namespace App\Controller;
 
 use App\Entity\Groupe;
 use App\Entity\Participant;
+use App\Form\GroupeType;
 use App\Repository\GroupeRepository;
+use App\Repository\ParticipantRepository;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class GroupeController extends AbstractController
 {
     /**
-     * @Route("/groupe", name="groupe")
+     * @Route("/groupe", name="groupe_list")
      */
-    public function index(): Response
+    public function groupe_list(): Response
     {
+        $em = $this->getDoctrine()->getManager();
+        /** @var GroupeRepository $groupeRepo */
+        $groupeRepo = $em->getRepository(Groupe::class);
+        $listeGroupes = array_merge(
+            $groupeRepo->findByParticipant($this->getUser()->getParticipant()),
+            $groupeRepo->findByOwner($this->getUser()->getParticipant())
+        );
 
+
+        return $this->render('groupe/liste.html.twig', [
+            'controller_name' => 'GroupeController',
+            "listeGroupes" => $listeGroupes,
+            "title" => "Mes groupes"
+        ]);
+    }
+
+    /**
+     * @Route("/groupe/{id}", name="groupe_view")
+     * @param int $id
+     * @return Response
+     */
+    public function groupe_view(int $id): Response {
+        $em = $this->getDoctrine()->getManager();
+        /** @var GroupeRepository $groupeRepo */
+        $groupeRepo = $em->getRepository(Groupe::class);
+        /** @var Groupe $groupe */
+        $groupe = $groupeRepo->find($id);
+
+        if (!$groupe->getParticipants()->contains($this->getUser())) {
+            // throw
+        }
+
+//entitytype
+        return $this->render('groupe/view.html.twig', [
+            'controller_name'       => 'GroupeController',
+            "groupe"                => $groupe,
+            "title"                 => $groupe->getLibelle(),
+        ]);
+
+    }
+
+    /**
+     * @Route("/groupe/edit/{id<\d+>?0}", name="groupe_edit", priority="1")
+     * @param Request $request
+     * @param int $id
+     * @return Response
+     */
+    public function groupe_edit(Request $request, int $id): Response {
+        $em = $this->getDoctrine()->getManager();
+        /** @var GroupeRepository $groupeRepo */
+        $groupeRepo = $em->getRepository(Groupe::class);
+        $groupe = $groupeRepo->find($id);
+
+        $form = $this->createForm(GroupeType::class);
+        $form->setData($groupe);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $em->persist($groupe);
+                $em->flush();
+            } else {
+                foreach($form->getErrors(true) as $e) {
+                    $this->addFlash("alert", $e->getMessage());
+                }
+            }
+        }
+
+        return $this->render('groupe/edit.html.twig', [
+            'controller_name'       => 'GroupeController',
+            "form"                  => $form->createView(),
+            "title"                 => "Modifier: {$groupe->getLibelle()}"
+        ]);
+    }
+
+    /**
+     * @Route("/groupe/add", name="groupe_add", priority="1")
+     * @param Request $request
+     * @return Response
+     */
+    public function groupe_add(Request $request): Response {
+        $em = $this->getDoctrine()->getManager();
+        $groupe = new Groupe();
+        $groupe->setOwner($this->getUser()->getParticipant());
+
+        $form = $this->createForm(GroupeType::class);
+        $form->setData($groupe);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $em->persist($groupe);
+                $em->flush();
+            } else {
+                foreach($form->getErrors(true) as $e) {
+                    $this->addFlash("alert", $e->getMessage());
+                }
+            }
+        }
+
+        return $this->render('groupe/add.html.twig', [
+            'controller_name'       => 'GroupeController',
+            "form"                  => $form->createView(),
+            "title"                 => "Création d'un nouveau groupe"
+        ]);
+    }
+
+    public function test() {
 
 
         $em = $this->getDoctrine()->getManager();
@@ -58,10 +169,5 @@ class GroupeController extends AbstractController
 
 
 
-
-        return $this->render('groupe/index.html.twig', [
-            'controller_name' => 'GroupeController',
-            "title" => "Groupe"
-        ]);
     }
 }

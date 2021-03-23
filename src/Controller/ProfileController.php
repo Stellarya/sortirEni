@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Participant;
+use App\Entity\Sortie;
 use App\Entity\User;
 use App\Form\EditProfileType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -34,11 +35,14 @@ class ProfileController extends AbstractController
             $title = "Mon profil";
         }
 
+        $sortieRepo = $entityManager->getRepository(Sortie::class);
+        $nbSorties = count($sortieRepo->findSortiesByParticipant($user->getParticipant()->getId()));
 
         return $this->render('profile/view.html.twig', [
             "controller_name" => "ProfileController",
             "user" => $user,
-            "title" => $title
+            "nbSorties" => $nbSorties,
+            "title" => $title,
         ]);
 
     }
