@@ -72,8 +72,6 @@ class LieuController extends AbstractController
             try {
                 $raw = file_get_contents($url);
                 $json = json_decode($raw, true);
-                $emplacement2 = $json["data"][0]["latitude"];
-                //dd($emplacement2, $json);
                 $oLieu->setLatitude($json["data"][0]["latitude"]);
                 $oLieu->setLongitude($json["data"][0]["longitude"]);
             } catch (\Exception $ex){

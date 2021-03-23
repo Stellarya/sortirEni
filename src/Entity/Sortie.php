@@ -119,6 +119,7 @@ class Sortie
      */
     private $messageAnnulation;
 
+
     public function __construct()
     {
         $this->participants = new ArrayCollection();
