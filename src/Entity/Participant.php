@@ -51,7 +51,7 @@ class Participant
     private $estInscrit;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Groupe::class, inversedBy="participants")
+     * @ORM\ManyToMany(targetEntity=Groupe::class, mappedBy="participants")
      */
     private $groupes;
 

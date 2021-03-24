@@ -12,7 +12,7 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
+//inversedby
 class GroupeType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -22,6 +22,7 @@ class GroupeType extends AbstractType
             ->add("participants", EntityType::class, [
                 "label" => "Participant(s)",
                 "class" => Participant::class,
+                "required" => false,
                 'multiple' => true,
                 "query_builder" => function(EntityRepository $er) {
                     return $er->createQueryBuilder("p")->orderBy("p.nom", "ASC");
