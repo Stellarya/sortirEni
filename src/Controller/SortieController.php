@@ -5,9 +5,11 @@ namespace App\Controller;
 use App\Entity\Participant;
 use App\Entity\Sortie;
 use App\Entity\User;
+use App\Form\LieuType;
 use App\Form\SortieFiltreType;
 use App\Form\SortieType;
 use App\Repository\EtatRepository;
+use App\Repository\LieuRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\SiteRepository;
 use App\Repository\SortieRepository;
@@ -53,12 +55,13 @@ class SortieController extends AbstractController
      * @return Response
      * @throws QueryException
      */
-    public function liste(Request $request,
-                          SortieRepository $sortieRepository,
-                          UserRepository $userRepository,
-                          SessionInterface $session,
-                          int $pageNumber = 1): Response
-    {
+    public function liste(
+        Request $request,
+        SortieRepository $sortieRepository,
+        UserRepository $userRepository,
+        SessionInterface $session,
+        int $pageNumber = 1
+    ): Response {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $detect = new Mobile_Detect();
 
@@ -135,7 +138,12 @@ class SortieController extends AbstractController
                 $firstResult = ($pageNumber - 1) * $maxResults;
                 $sorties = array_slice($sorties, $firstResult, $maxResults);
             }
-            list($nbPage, $pagesAafficher) = $this->getInfosPourPagination($sortieRepository, $maxResults, $pageNumber, $session);
+            list($nbPage, $pagesAafficher) = $this->getInfosPourPagination(
+                $sortieRepository,
+                $maxResults,
+                $pageNumber,
+                $session
+            );
         }
 
         $sorties = $this->triSortiesParDate($sorties);
@@ -169,11 +177,9 @@ class SortieController extends AbstractController
      */
     public function ajoutUniqueAuTableau(array $sortiesConcernees, array $sorties): array
     {
-        if (count($sorties) == 0)
-        {
+        if (count($sorties) == 0) {
             $sorties = $sortiesConcernees;
-        } else
-        {
+        } else {
             $sortiesTemp = [];
             foreach ($sortiesConcernees as $sortie) {
                 if (in_array($sortie, $sorties) && $sortie->getSite()->getId() == $this->siteID) {
@@ -190,23 +196,27 @@ class SortieController extends AbstractController
     /**
      * @Route("/sortie/{id}/formulaire", name="page_formulaire_sortie", requirements={"id": "-?\d+"})
      * @param Request $request
-     * @param int $id
      * @param EntityManagerInterface $em
      * @param SortieRepository $sortieRepository
      * @param SiteRepository $siteRepository
      * @param EtatRepository $etatRepository
+     * @param LieuRepository $lieuRepository
      * @param SluggerInterface $slugger
      * @param UserRepository $userRepository
+     * @param int $id
      * @return Response
      */
-    public function form(Request $request, int $id,
-                         EntityManagerInterface $em,
-                         SortieRepository $sortieRepository,
-                         SiteRepository $siteRepository,
-                         EtatRepository $etatRepository,
-                         SluggerInterface $slugger,
-                         UserRepository $userRepository): Response
-    {
+    public function form(
+        Request $request,
+        EntityManagerInterface $em,
+        SortieRepository $sortieRepository,
+        SiteRepository $siteRepository,
+        EtatRepository $etatRepository,
+        LieuRepository $lieuRepository,
+        SluggerInterface $slugger,
+        UserRepository $userRepository,
+        int $id = -1
+    ): Response {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         if (-1 == $id) {
@@ -214,18 +224,60 @@ class SortieController extends AbstractController
             $title = 'Créer une Sortie';
         } else {
             $sortie = $sortieRepository->find($id);
-            $participant = $userRepository->findOneBy(["username" => $this->getUser()->getUsername()])->getParticipant();
+            $participant = $userRepository->findOneBy(["username" => $this->getUser()->getUsername()])->getParticipant(
+            );
 
-            if(!$this->peutModifier($participant, $sortie))
-            {
+            if (!$this->peutModifier($participant, $sortie)) {
                 $this->addFlash("alert", "Erreur ! Vous n'avez pas les droits pour faire cette action.");
+
                 return $this->redirectToRoute('page_sortie');
             }
             $title = 'Modifier une Sortie';
         }
 
-        $sortieForm = $this->createForm(SortieType::class, $sortie);
 
+        $lieu = $sortie->getLieu();
+        $lieuForm = $this->createForm(LieuType::class, $lieu);
+        $lieuForm->handleRequest($request);
+        if ($lieuForm->isSubmitted() && $lieuForm->isValid()) {
+            if ($request->get('nom') != "") {
+                $sortie->setNom($request->get('nom'));
+            }
+            if ($request->get('dateHeureDebut') != "") {
+                $sortie->setDateHeureDebut(DateTime::createFromFormat('Y-m-d\TH:i', $request->get('dateHeureDebut')));
+            }
+            if ($request->get('dateLimiteInscription') != "") {
+                $sortie->setDateLimiteInscription(
+                    DateTime::createFromFormat('Y-m-d', $request->get('dateLimiteInscription'))
+                );
+            }
+            if ($request->get('duree') != "") {
+                $sortie->setDuree($request->get('duree'));
+            }
+            if ($request->get('nbInscriptionMax') != "") {
+                $sortie->setNbInscriptionMax($request->get('nbInscriptionMax'));
+            }
+            if ($request->get('infosSortie') != "") {
+                $sortie->setInfosSortie($request->get('infosSortie'));
+            }
+
+            //dd($request->get('urlPhoto'));
+            $lieu = $lieuForm->getData();
+            $sortie->setLieu($lieu);
+            $this->forward(
+                'App\Controller\LieuController::form',
+                [
+                    'request' => $request,
+                    'id' => -1,
+                    'em' => $em,
+                    'lieuRepository' => $lieuRepository,
+                    'lieuFormSortie' => $lieu,
+                ]
+            );
+            //return $this->redirectToRoute('page_sortie');
+        }
+
+        $sortieForm = $this->createForm(SortieType::class, $sortie);
         $sortieForm->handleRequest($request);
         if ($sortieForm->isSubmitted() && $sortieForm->isValid()) {
             if ($sortieForm->get('enregistrer')->isClicked()) {
@@ -234,7 +286,6 @@ class SortieController extends AbstractController
             if ($sortieForm->get('publier')->isClicked()) {
                 $sortie->setEtat($etatRepository->findOneBy(["libelle" => "Ouverte"]));
             }
-
             $urlPhoto = $sortieForm["urlPhoto"]->getData();
             if ($urlPhoto) {
                 $originalFilename = pathinfo($urlPhoto->getClientOriginalName(), PATHINFO_FILENAME);
@@ -271,10 +322,15 @@ class SortieController extends AbstractController
             return $this->redirectToRoute('page_sortie');
         }
 
-        return $this->render('sortie/formulaire.html.twig', [
-            "sortieForm" => $sortieForm->createView(),
-            "title" => $title
-        ]);
+        return $this->render(
+            'sortie/formulaire.html.twig',
+            [
+                "sortieForm" => $sortieForm->createView(),
+                "lieuForm" => $lieuForm->createView(),
+                "title" => $title,
+                "id" => $id,
+            ]
+        );
     }
 
     /**
@@ -285,11 +341,12 @@ class SortieController extends AbstractController
      * @param int $pageNumber
      * @return Response
      */
-    public function detailSortie(SortieRepository $sortieRepository,
-                                 UserRepository $userRepository,
-                                 int $id = null,
-                                 int $pageNumber = 1): Response
-    {
+    public function detailSortie(
+        SortieRepository $sortieRepository,
+        UserRepository $userRepository,
+        int $id = null,
+        int $pageNumber = 1
+    ): Response {
         $sortie = $sortieRepository->find($id);
 
         $nom = $sortie->getNom();
@@ -305,17 +362,19 @@ class SortieController extends AbstractController
 
         $toParticipants = $sortie->getParticipants();
         $tUserParticipant = array();
-        foreach ($toParticipants as $oParticipant){
+        foreach ($toParticipants as $oParticipant) {
             $userParticipant = $userRepository->findOneBy(["participant" => $oParticipant->getId()]);
             $tUserParticipant[$oParticipant->getId()] = $userParticipant->getId();
         }
 
-        return $this->render('sortie/details.html.twig', [
+        return $this->render(
+            'sortie/details.html.twig',
+            [
                 "sortie" => $sortie,
                 'title' => 'Details de la sortie',
                 'nom' => $nom,
                 'lieu' => $lieu,
-                'dateHeure' => date('d/m/Y', $dateHeure) . ' à ' . date('H:m', $dateHeure),
+                'dateHeure' => date('d/m/Y', $dateHeure).' à '.date('H:m', $dateHeure),
                 'dateLimite' => date('d/m/Y', $dateLimiteInscription),
                 'latitude' => $latitude,
                 'userActuel' => $user,
@@ -327,7 +386,7 @@ class SortieController extends AbstractController
                 'peutSeDesinscrire' => $droits['peutSeDesinscrire'],
                 'peutModifier' => $droits['peutModifier'],
                 'peutPublier' => $droits['peutPublier'],
-                'peutAnnuler' => $droits['peutAnnuler']
+                'peutAnnuler' => $droits['peutAnnuler'],
             ]
         );
     }
@@ -337,12 +396,12 @@ class SortieController extends AbstractController
      * @param Sortie $sortie
      * @return bool[]
      */
-    public function droits (Participant $user, Sortie $sortie) : array
+    public function droits(Participant $user, Sortie $sortie): array
     {
         $utilisateurPresent = $this->estUtilisateurPresentDansParticipantsSortie($sortie, $user);
         $nomEtat = $sortie->getEtat()->getLibelle();
 
-        $peutSinscrire = $this->peutSinscrire($nomEtat)  && !$utilisateurPresent;
+        $peutSinscrire = $this->peutSinscrire($nomEtat) && !$utilisateurPresent;
         $peutSeDesinscrire = $this->peutSeDesinscrire($nomEtat) && $utilisateurPresent;
         $peutModifier = $this->peutModifier($user, $sortie);
         $peutPublier = $this->peutPublier($user, $sortie);
@@ -363,18 +422,20 @@ class SortieController extends AbstractController
      * @param Sortie $sortie
      * @return bool
      */
-    public function peutModifier (Participant $user, Sortie $sortie) : bool
+    public function peutModifier(Participant $user, Sortie $sortie): bool
     {
-        if($this->estAdmin())
+        if ($this->estAdmin()) {
             return true;
-        if(!$this->estOrganisateur($user, $sortie))
-            return false;
-
-        $nomEtat = $sortie->getEtat()->getLibelle();
-        if ($nomEtat != 'Créée')
-        {
+        }
+        if (!$this->estOrganisateur($user, $sortie)) {
             return false;
         }
+
+        $nomEtat = $sortie->getEtat()->getLibelle();
+        if ($nomEtat != 'Créée') {
+            return false;
+        }
+
         return true;
     }
 
@@ -383,17 +444,19 @@ class SortieController extends AbstractController
      * @param Sortie $sortie
      * @return bool
      */
-    public function peutPublier (Participant $user, Sortie $sortie) : bool
+    public function peutPublier(Participant $user, Sortie $sortie): bool
     {
         $nomEtat = $sortie->getEtat()->getLibelle();
-        if ($nomEtat != 'Créée')
-        {
+        if ($nomEtat != 'Créée') {
             return false;
         }
-        if($this->estAdmin())
+        if ($this->estAdmin()) {
             return true;
-        if(!$this->estOrganisateur($user, $sortie))
+        }
+        if (!$this->estOrganisateur($user, $sortie)) {
             return false;
+        }
+
         return true;
     }
 
@@ -402,18 +465,20 @@ class SortieController extends AbstractController
      * @param Sortie $sortie
      * @return bool
      */
-    public function peutAnnuler (Participant $user, Sortie $sortie) : bool
+    public function peutAnnuler(Participant $user, Sortie $sortie): bool
     {
-        if($this->estAdmin())
+        if ($this->estAdmin()) {
             return true;
-        if(!$this->estOrganisateur($user, $sortie))
+        }
+        if (!$this->estOrganisateur($user, $sortie)) {
             return false;
+        }
 
         $nomEtat = $sortie->getEtat()->getLibelle();
-        if ($nomEtat != 'Ouverte' && $nomEtat != 'Clôturée' && $nomEtat != 'Créée')
-        {
+        if ($nomEtat != 'Ouverte' && $nomEtat != 'Clôturée' && $nomEtat != 'Créée') {
             return false;
         }
+
         return true;
     }
 
@@ -421,12 +486,12 @@ class SortieController extends AbstractController
      * @param string $nomEtat
      * @return bool
      */
-    public function peutSeDesinscrire(string $nomEtat) : bool
+    public function peutSeDesinscrire(string $nomEtat): bool
     {
-        if ($nomEtat != 'Ouverte' && $nomEtat != 'Clôturée')
-        {
-                return false;
+        if ($nomEtat != 'Ouverte' && $nomEtat != 'Clôturée') {
+            return false;
         }
+
         return true;
     }
 
@@ -434,12 +499,12 @@ class SortieController extends AbstractController
      * @param string $nomEtat
      * @return bool
      */
-    public function peutSinscrire(string $nomEtat) : bool
+    public function peutSinscrire(string $nomEtat): bool
     {
-        if ($nomEtat != 'Ouverte')
-        {
+        if ($nomEtat != 'Ouverte') {
             return false;
         }
+
         return true;
     }
 
@@ -451,11 +516,12 @@ class SortieController extends AbstractController
      * @param int $id
      * @return RedirectResponse
      */
-    public function inscriptionSortie(Request $request,
-                                      SortieRepository $sortieRepository,
-                                      ParticipantRepository $participantRepository,
-                                      int $id): RedirectResponse
-    {
+    public function inscriptionSortie(
+        Request $request,
+        SortieRepository $sortieRepository,
+        ParticipantRepository $participantRepository,
+        int $id
+    ): RedirectResponse {
         $em = $this->getDoctrine()->getManager();
 
         if ($request->getMethod() === 'POST') {
@@ -484,11 +550,12 @@ class SortieController extends AbstractController
      * @param int $id
      * @return RedirectResponse
      */
-    public function desinscriptionSortie(Request $request,
-                                         SortieRepository $sortieRepository,
-                                         ParticipantRepository $participantRepository,
-                                         int $id): RedirectResponse
-    {
+    public function desinscriptionSortie(
+        Request $request,
+        SortieRepository $sortieRepository,
+        ParticipantRepository $participantRepository,
+        int $id
+    ): RedirectResponse {
         $em = $this->getDoctrine()->getManager();
 
         if ($request->getMethod() === 'POST') {
@@ -517,15 +584,17 @@ class SortieController extends AbstractController
      * @param int $id
      * @return JsonResponse|RedirectResponse
      */
-    public function annulationSortie(Request $request,
-                                     SortieRepository $sortieRepository,
-                                     EtatRepository $etatRepository,
-                                     ParticipantRepository $participantRepository,
-                                     int $id)
-    {
+    public function annulationSortie(
+        Request $request,
+        SortieRepository $sortieRepository,
+        EtatRepository $etatRepository,
+        ParticipantRepository $participantRepository,
+        int $id
+    ) {
         $oSortie = $sortieRepository->find($id);
         if ($request->getMethod() !== 'POST') {
             $this->addFlash("alert", "Erreur ! Vous n'avez pas les droits pour faire cette action.");
+
             return $this->redirectToRoute('page_sortie');
         }
 
@@ -533,14 +602,14 @@ class SortieController extends AbstractController
             $userID = $request->get('idParticipant');
             $participant = $participantRepository->find($userID);
             $messageAnnulation = $request->get('motifAnnulation');
-            if($messageAnnulation == "")
-            {
+            if ($messageAnnulation == "") {
                 $this->addFlash("alert", "Merci de saisir un message d'annulation.");
+
                 return $this->redirectToRoute('page_details_sortie', array('id' => $id));
             }
-            if(!$this->peutAnnuler($participant, $oSortie))
-            {
+            if (!$this->peutAnnuler($participant, $oSortie)) {
                 $this->addFlash("alert", "Erreur ! Vous n'avez pas les droits pour faire cette action.");
+
                 return $this->redirectToRoute('page_sortie');
             }
             $etat = $etatRepository->findOneBy(["libelle" => "Annulée"]);
@@ -550,11 +619,14 @@ class SortieController extends AbstractController
             $em->persist($oSortie);
             $em->flush();
             $this->addFlash("success", "Sortie annulée avec succès.");
+
             return $this->redirectToRoute('page_sortie');
         } else {
-            return new JsonResponse([
-                'errorMessage' => 'Erreur ! La sortie à supprimer n\'existe pas.'
-            ]);
+            return new JsonResponse(
+                [
+                    'errorMessage' => 'Erreur ! La sortie à supprimer n\'existe pas.',
+                ]
+            );
         }
 
     }
@@ -568,12 +640,13 @@ class SortieController extends AbstractController
      * @param int $id
      * @return RedirectResponse
      */
-    public function publicationSortie(Request $request,
+    public function publicationSortie(
+        Request $request,
         SortieRepository $sortieRepository,
         ParticipantRepository $participantRepository,
         EtatRepository $etatRepository,
-        int $id): RedirectResponse
-    {
+        int $id
+    ): RedirectResponse {
         $em = $this->getDoctrine()->getManager();
 
         if ($request->getMethod() === 'POST') {
@@ -586,6 +659,7 @@ class SortieController extends AbstractController
                 $em->persist($oSortie);
                 $em->flush();
                 $this->addFlash("success", "Sortie publiée avec succès !");
+
                 return $this->redirectToRoute('page_sortie');
             } else {
                 $this->addFlash("alert", "La sortie n'a pas pu être publiée !");
@@ -614,21 +688,22 @@ class SortieController extends AbstractController
      * @return array
      * @throws QueryException
      */
-    public function GestionFiltres(bool $txtRecherche,
-                                   $data,
-                                   SortieRepository $sortieRepository,
-                                   array $sorties,
-                                   bool $dateDebut,
-                                   bool $dateFin,
-                                   $estOrganisateur,
-                                   $estInscrit,
-                                   $estPasInscrit,
-                                   UserRepository $userRepository,
-                                   $estSortiePassee,
-                                   $maxResults,
-                                   $pageNumber,
-                                   SessionInterface $session): array
-    {
+    public function GestionFiltres(
+        bool $txtRecherche,
+        $data,
+        SortieRepository $sortieRepository,
+        array $sorties,
+        bool $dateDebut,
+        bool $dateFin,
+        $estOrganisateur,
+        $estInscrit,
+        $estPasInscrit,
+        UserRepository $userRepository,
+        $estSortiePassee,
+        $maxResults,
+        $pageNumber,
+        SessionInterface $session
+    ): array {
         if ($txtRecherche) {
             $texte = $data["nom_recherche"];
             $sortiesConcernees = $sortieRepository->findSortiesParTexte($texte);
@@ -712,11 +787,12 @@ class SortieController extends AbstractController
      * @param SessionInterface $session
      * @return array
      */
-    public function getInfosPourPagination(SortieRepository $sortieRepository,
-                                           int $maxResults,
-                                           int $pageNumber,
-                                           SessionInterface $session): array
-    {
+    public function getInfosPourPagination(
+        SortieRepository $sortieRepository,
+        int $maxResults,
+        int $pageNumber,
+        SessionInterface $session
+    ): array {
         $nbSortiesSession = $session->get('nbSorties');
         if (isset($nbSortiesSession)) {
             $nbSorties = $nbSortiesSession;
@@ -726,8 +802,10 @@ class SortieController extends AbstractController
         }
         $nbPage = ceil($nbSorties / $maxResults);
         $pagesAafficher = array($pageNumber - 1, $pageNumber + 1, $pageNumber + 2);
-        if ($nbPage == 0)
+        if ($nbPage == 0) {
             $nbPage = 1;
+        }
+
         return array($nbPage, $pagesAafficher);
     }
 
@@ -771,6 +849,7 @@ class SortieController extends AbstractController
         if ($user->getId() != $sortie->getOrganisateur()->getId()) {
             return false;
         }
+
         return true;
     }
 

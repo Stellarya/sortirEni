@@ -1,16 +1,87 @@
 {% extends('base.html.twig') %}
 {% block body %}
+
     <div class="container">
 
-    <div>
+
         {% form_theme sortieForm 'bootstrap_4_horizontal_layout.html.twig' %}
-
         {{ form_start(sortieForm) }}
-        {{ form_widget(sortieForm) }}
-        <a href="{{ path('page_sortie') }}" class="btn btn-danger">Annuler</a>
+        {{ form_row(sortieForm.nom) }}
+        {{ form_row(sortieForm.dateHeureDebut) }}
+        {{ form_row(sortieForm.dateLimiteInscription) }}
+        {{ form_row(sortieForm.duree) }}
+        {{ form_row(sortieForm.nbInscriptionMax) }}
+        {{ form_row(sortieForm.infosSortie) }}
+        {{ form_row(sortieForm.urlPhoto) }}
+        {{ form_row(sortieForm.lieu) }}
+
+        <div class="form-group row">
+            <label class="col-form-label col-sm-2 required" for="ajoutNouveauLieu">Ajouter lieu
+            </label>
+            <div class="col-sm-10">
+                <a href="{{ path('page_sortie') }}" class="btn btn-primary" data-toggle="modal" data-target="#form">
+                    Ajouter un lieu <i class="fas fa-plus"></i></a>
+            </div>
+        </div>
+        {{ form_row(sortieForm.enregistrer) }}
+        {{ form_row(sortieForm.publier) }}
         {{ form_end(sortieForm) }}
+        <a href="{{ path('page_sortie') }}" class="btn btn-danger">Annuler</a>
 
-    </div>
+
+        <div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="annulationModale"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">Z
+                <div class="modal-content">
+                    <div class="modal-header border-bottom-0">
+                        <h5 class="modal-title" id="annulationModale">Ajout d'un lieu</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body d-flex justify-content-center">
+                        {{ form_start(lieuForm) }}
+                        <div class="form-group mb-3 row">
+                            <label class="col-3 col-form-label" for="lieu_nom">Nom </label>
+                            {{ form_widget(lieuForm.nom) }}
+                        </div>
+                        <div class="form-group mb-3 row">
+                            <label class="col-3 col-form-label" for="lieu_rue">Rue </label>
+                            {{ form_widget(lieuForm.rue) }}
+                        </div>
+                        <div class="form-group mb-3 row">
+                            <label class="col-3 col-form-label" for="lieu_ville">Ville </label>
+                            {{ form_widget(lieuForm.ville) }}
+                        </div>
+                        <input type="hidden" value="" id="nom" name="nom">
+                        <input type="hidden" value="" id="dateHeureDebut" name="dateHeureDebut">
+                        <input type="hidden" value="" id="dateLimiteInscription" name="dateLimiteInscription">
+                        <input type="hidden" value="" id="duree" name="duree">
+                        <input type="hidden" value="" id="nbInscriptionMax" name="nbInscriptionMax">
+                        <input type="hidden" value="" id="infosSortie" name="infosSortie">
+                    </div>
+                    <div class="modal-footer border-top-0 d-flex justify-content-center">
+                        {{ form_row(lieuForm.ajouter, { 'attr': {'onclick': 'copyFormValue()'}}) }}
+                    </div>
+                    {{ form_end(lieuForm) }}
+
+                </div>
+            </div>
+        </div>
     </div>
 
+    <script>
+        function copyFormValue() {
+            document.getElementById('nom').value = document.getElementById('sortie_nom').value;
+            document.getElementById('dateHeureDebut').value = document.getElementById('sortie_dateHeureDebut').value;
+            document.getElementById('dateLimiteInscription').value = document.getElementById('sortie_dateLimiteInscription').value;
+            document.getElementById('duree').value = document.getElementById('sortie_duree').value;
+            document.getElementById('nbInscriptionMax').value = document.getElementById('sortie_nbInscriptionMax').value;
+            document.getElementById('infosSortie').value = document.getElementById('sortie_infosSortie').value;
+        }
+        $(document).on('change', '.custom-file-input', function () {
+            let fileName = $(this).val().replace(/\\/g, '/').replace(/.*\//, '');
+            $(this).parent('.custom-file').find('.custom-file-label').text(fileName);
+        });
+    </script>
 {% endblock %}

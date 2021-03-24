@@ -10,6 +10,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -42,7 +43,7 @@ class SortieType extends AbstractType
             ->add('dateLimiteInscription', DateType::class,
                 [
                     'widget' => 'single_text',
-                    'label' => 'Date limite d\'inscription '
+                    'label' => 'Date limite d\'inscription'
                 ])
             ->add('duree', NumberType::class,
                 [
@@ -63,7 +64,7 @@ class SortieType extends AbstractType
                     ],
                 ])
             ->add("urlPhoto", FileType::class, [
-                "label" => "Avatar",
+                "label" => "Image",
                 "mapped" => false,
                 "required"  => false,
                 'constraints' => [
