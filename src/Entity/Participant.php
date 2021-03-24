@@ -167,6 +167,24 @@ class Participant
         return $this;
     }
 
+    /**
+     * @return Collection
+     */
+    public function getGroupes(): Collection
+    {
+        return $this->groupes;
+    }
+
+    /**
+     * @param Collection $groupes
+     */
+    public function setGroupes(Collection $groupes): void
+    {
+        $this->groupes = $groupes;
+    }
+
+
+
     public function getIdentite(): string {
         return "{$this->getPrenom()} {$this->getNom()}";
     }

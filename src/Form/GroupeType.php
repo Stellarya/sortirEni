@@ -19,16 +19,6 @@ class GroupeType extends AbstractType
     {
         $builder
             ->add('libelle')
-            //->add('owner')
-            //->add('participants')
-            //->add("participants", EntityType::class, [
-            //    "label" => "Participant",
-            //    "class" => Participant::class,
-            //    "query_builder" => function(EntityRepository $er) {
-            //        return $er->createQueryBuilder("p")->orderBy("p.nom", "ASC");
-            //    },
-            //    "choice_label" => "nom",
-            //])
             ->add("participants", EntityType::class, [
                 "label" => "Participant(s)",
                 "class" => Participant::class,
@@ -43,10 +33,18 @@ class GroupeType extends AbstractType
                 [
                     'label' => 'Enregistrer',
                     'attr' => [
-                        'class' => 'btn btn-secondary',
+                        'class' => 'btn btn-primary',
                     ],
                 ]
             )
+            ->add("Supprimer",
+            SubmitType::class,
+            [
+                "label" => "Supprimer",
+                'attr' => [
+                    'class' => 'btn btn-danger',
+                ],
+            ])
         ;
     }
 

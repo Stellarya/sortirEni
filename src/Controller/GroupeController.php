@@ -23,11 +23,10 @@ class GroupeController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         /** @var GroupeRepository $groupeRepo */
         $groupeRepo = $em->getRepository(Groupe::class);
-        $listeGroupes = array_merge(
+        $listeGroupes = array_unique(array_merge(
             $groupeRepo->findByParticipant($this->getUser()->getParticipant()),
             $groupeRepo->findByOwner($this->getUser()->getParticipant())
-        );
-
+        ), SORT_REGULAR);
 
         return $this->render('groupe/liste.html.twig', [
             'controller_name' => 'GroupeController',
@@ -52,7 +51,6 @@ class GroupeController extends AbstractController
             // throw
         }
 
-//entitytype
         return $this->render('groupe/view.html.twig', [
             'controller_name'       => 'GroupeController',
             "groupe"                => $groupe,
@@ -79,8 +77,15 @@ class GroupeController extends AbstractController
         $form->handleRequest($request);
         if ($form->isSubmitted()) {
             if ($form->isValid()) {
-                $em->persist($groupe);
-                $em->flush();
+                if ($form->get('Supprimer')->isClicked()) {
+                    $em->remove($groupe);
+                    $em->flush();
+                    return $this->redirectToRoute("groupe_list");
+                } else {
+                    $em->persist($groupe);
+                    $em->flush();
+                    return $this->redirectToRoute("groupe_view", ["id" => $groupe->getId()]);
+                }
             } else {
                 foreach($form->getErrors(true) as $e) {
                     $this->addFlash("alert", $e->getMessage());
@@ -106,6 +111,7 @@ class GroupeController extends AbstractController
         $groupe->setOwner($this->getUser()->getParticipant());
 
         $form = $this->createForm(GroupeType::class);
+        $form->remove("Supprimer");
         $form->setData($groupe);
 
         $form->handleRequest($request);
@@ -113,6 +119,7 @@ class GroupeController extends AbstractController
             if ($form->isValid()) {
                 $em->persist($groupe);
                 $em->flush();
+                return $this->redirectToRoute("groupe_view", ["id" => $groupe->getId()]);
             } else {
                 foreach($form->getErrors(true) as $e) {
                     $this->addFlash("alert", $e->getMessage());
