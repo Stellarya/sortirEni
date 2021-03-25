@@ -3,13 +3,14 @@
     <div class="container-fluid">
         <a href="{{ path('page_sortie', {'pageNumber' : pageNumber}) }}"
            class="btn btn-primary m-2">Retourner à la liste des sorties</a>
-        <div class="card mb-3 mt-5">
+        <div class="card mb-3 mt-2">
             <div class="row g-0">
                 <div class="col-md-4">
-                    {% if sortie.id is divisible by (2) %}
-                        <img class="card-img image_details" src="{{ asset("images/thabor.jpg") }}" alt="Card image cap">
+                    {% if sortie.urlPhoto|length > 0 %}
+                        <img class="card-img-top image_details" src="{{ asset("uploads/urlphoto/") ~ sortie.urlPhoto }}"
+                             alt="Card image cap">
                     {% else %}
-                        <img class="card-img image_details" src="{{ asset("images/thabor2.jpg") }}"
+                        <img class="card-img-top image_details" src="{{ asset("images/pas_image_disponible.png") }}"
                              alt="Card image cap">
                     {% endif %}
                 </div>
@@ -34,19 +35,38 @@
                                 </div>
                             </div>
                             <h5>Participants</h5>
-                            <table class="table">
+                            <table id="datatable_participant">
                                 <thead>
                                 <tr>
-                                    <th scope="col">Prenom</th>
-                                    <th scope="col">Nom</th>
+                                    <th class="d-none">ID</th>
+                                    <th>Prenom</th>
+                                    <th>Nom</th>
+                                    <th></th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {% if participants is not empty and participants is not null %}
                                     {% for participant in participants %}
                                         <tr>
+                                            <td class="d-none">{{ app.user.participant.id }}</td>
                                             <td>{{ participant.prenom }}</td>
                                             <td>{{ participant.nom }}</td>
+                                            {% if participant.id == userActuel.id %}
+                                                <td class="d-flex flex-row-reverse">
+                                                    <a href="{{ path('profile_view') }}"
+                                                       type="button" class="btn btn-primary btn_modifier mr-2">
+                                                        <i class="fas fa-user-circle"></i> Voir mon profil
+                                                    </a>
+                                                </td>
+                                            {% else %}
+                                                <td class="d-flex flex-row-reverse">
+                                                    <a href="{{ path('profile_view', {'id' : tUserParticipant[participant.id]}) }}"
+                                                       type="button" class="btn btn-primary btn_modifier mr-2">
+                                                        <i class="fas fa-user-circle"></i> Voir le profil
+                                                    </a>
+                                                </td>
+                                            {% endif %}
+
                                         </tr>
                                     {% endfor %}
                                 {% else %}
@@ -56,59 +76,104 @@
                                 {% endif %}
                                 </tbody>
                             </table>
+
                         </div>
-                        <div class="card-text d-flex justify-content-between">
-                            {% if tIdParticipants is empty %}
+                        <div class="card-text d-flex justify-content-between mt-3">
+                            {% if peutSinscrire %}
                                 <form action="{{ path('page_inscription_sortie', {'id' : sortie.id}) }}"
                                       method="post" class="mr-2">
                                     <input type="hidden" value="{{ app.user.participant.id }}"
                                            name="idParticipant">
-                                    <button id="inscription_sortie" type="submit"
+                                    <button type="submit"
                                             class="btn btn-secondary">S'inscrire
                                     </button>
                                 </form>
                             {% endif %}
-                            {% for idParticipant in tIdParticipants %}
-                                {% if participants|length < sortie.nbInscriptionMax and date(sortie.dateLimiteInscription) > date()
-                                    and app.user.participant.id not in idParticipant and date(sortie.dateHeureDebut) > date() %}
-
-                                    <form action="{{ path('page_inscription_sortie', {'id' : sortie.id}) }}"
-                                          method="post" class="mr-2">
-                                        <input type="hidden" value="{{ app.user.participant.id }}"
-                                               name="idParticipant">
-                                        <button id="inscription_sortie" type="submit"
-                                                class="btn btn-secondary">S'inscrire
-                                        </button>
-                                    </form>
-                                {% endif %}
-                                {% if app.user.participant.id in idParticipant %}
-                                    <form action="{{ path('page_desinscription_sortie', {'id' : sortie.id}) }}"
-                                          method="post"
-                                          class="ml-2">
-                                        <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
-                                        <button id="desinscription_sortie" type="submit"
-                                                class="btn btn-danger">Se désinscrire
-                                        </button>
-                                    </form>
-                                {% endif %}
-                            {% endfor %}
-                            {% if (app.user.participant.id == sortie.organisateur.id
-                                or "ROLE_ADMIN" in app.user.roles) and date(sortie.dateHeureDebut) > date()%}
-                                <form action="{{ path('page_annulation_sortie', {'id' : sortie.id}) }}"
+                            {% if peutSeDesinscrire %}
+                                <form action="{{ path('page_desinscription_sortie', {'id' : sortie.id}) }}"
                                       method="post"
                                       class="ml-2">
                                     <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
-                                    <button id="annuler_sortie" type="submit"
-                                            class="btn btn-danger">Annuler
+                                    <button type="submit"
+                                            class="btn btn-danger">Se désinscrire
                                     </button>
                                 </form>
                             {% endif %}
-                            <a href="{{ path('page_formulaire_sortie', {'id' : sortie.id}) }}"
-                               class="btn btn-primary ml-2">Modifier</a>
+                            {% if peutAnnuler %}
+
+                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#form">
+                                    Annuler la sorie
+                                </button>
+
+                                <div class="modal fade" id="form" tabindex="-1" role="dialog" aria-labelledby="annulationModale" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header border-bottom-0">
+                                                <h5 class="modal-title" id="annulationModale">Suppression de la sortie</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <form action="{{ path('page_annulation_sortie', {'id' : sortie.id}) }}"
+                                                  method="post"
+                                                  class="ml-2">
+                                                <div class="modal-body">
+                                                    <label for="motif_annulation">Saisissez un message d'annulation</label>
+                                                    <div class="form-group">
+                                                        <textarea required class="form-control" id="motif_annulation" name="motifAnnulation"></textarea>
+                                                    </div>
+                                                    <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
+                                                </div>
+                                                <div class="modal-footer border-top-0 d-flex justify-content-center">
+                                                    <button type="submit" class="btn btn-danger">Annuler la sortie</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if peutPublier %}
+                                <form action="{{ path('page_publication_sortie', {'id' : sortie.id}) }}"
+                                      method="post"
+                                      class="ml-2">
+                                    <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
+                                    <button type="submit"
+                                            class="btn btn-primary">Publier
+                                    </button>
+                                </form>
+                            {% endif %}
+                            {% if peutModifier %}
+                                <form action="{{ path('page_formulaire_sortie', {'id' : sortie.id}) }}"
+                                      method="post"
+                                      class="ml-2">
+                                    <input type="hidden" value="{{ app.user.participant.id }}" name="idParticipant">
+                                    <button type="submit"
+                                            class="btn btn-primary">Modifier
+                                    </button>
+                                </form>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="col-12" style="height:300px; padding:0">
+            <div style="" id="map"></div>
+        </div>
+        <script>
+            var map = L.map('map').setView([{{ sortie.lieu.latitude }}, {{ sortie.lieu.longitude }}], 15);
+            L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=yn4AvBK0PIrhfTz3GmKm',{
+                tileSize: 512,
+                zoomOffset: -1,
+                minZoom: 1,
+                attribution: "\u003ca href=\"https://www.maptiler.com/copyright/\" target=\"_blank\"\u003e\u0026copy; MapTiler\u003c/a\u003e \u003ca href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\"\u003e\u0026copy; OpenStreetMap contributors\u003c/a\u003e",
+                crossOrigin: true
+            }).addTo(map);
+            var marker = L.marker([{{ sortie.lieu.latitude }}, {{ sortie.lieu.longitude }}]).addTo(map);
+        </script>
     </div>
+    <script>
+        $datatable = $("#datatable_participant").DataTable();
+    </script>
 {% endblock %}

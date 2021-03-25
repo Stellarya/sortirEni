@@ -50,6 +50,7 @@ class Sortie
 
     /**
      * @Assert\NotBlank(message="Merci de renseigner une date limite d'inscription.")
+     * @Assert\LessThanOrEqual(propertyPath="dateHeureDebut")
      * @ORM\Column(type="datetime")
      */
     private $dateLimiteInscription;
@@ -113,6 +114,17 @@ class Sortie
      * @ORM\JoinColumn(nullable=false)
      */
     private $organisateur;
+
+    /**
+     * @Assert\Length(
+     *     min="2", max="255",
+     *     minMessage="2 caractères minimum.",
+     *     maxMessage="255 caractères maximum."
+     * )
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $messageAnnulation;
+
 
     public function __construct()
     {
@@ -283,6 +295,7 @@ class Sortie
         return $this;
     }
 
+
     /**
      * @return mixed
      */
@@ -300,5 +313,16 @@ class Sortie
     }
 
 
+
+
+    public function getMessageAnnulation() : ?string
+    {
+        return $this->messageAnnulation;
+    }
+
+    public function setMessageAnnulation($messageAnnulation): void
+    {
+        $this->messageAnnulation = $messageAnnulation;
+    }
 
 }

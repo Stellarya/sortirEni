@@ -39,16 +39,16 @@
                 <div class="col-12 col-lg-6 col-xl-3 d-flex align-items-stretch">
                     <div class="card mb-3">
                         <div class="height100">
-                            {% if sortie.id is divisible by (2) %}
-                                <img class="card-img-top image_details" src="{{ asset("images/thabor.jpg") }}"
+                            {% if sortie.urlPhoto|length > 0 %}
+                                <img class="card-img-top image_details" src="{{ asset("uploads/urlphoto/") ~ sortie.urlPhoto }}"
                                      alt="Card image cap">
                             {% else %}
-                                <img class="card-img-top image_details" src="{{ asset("images/thabor2.jpg") }}"
+                                <img class="card-img-top image_details" src="{{ asset("images/pas_image_disponible.png") }}"
                                      alt="Card image cap">
                             {% endif %}
                         </div>
 
-                        <div class="card-body">
+                        <div class="card-body bg-light">
                             <h5 class="card-title">{{ sortie.nom }}</h5>
                             <p class="card-text">{{ sortie.infosSortie|striptags|slice(0,50) }}
                                 {% if sortie.infosSortie|length > 50 %}
@@ -59,10 +59,11 @@
                                 <br>
                                 À {{ sortie.Lieu.Ville.Nom }} le {{ sortie.dateHeureDebut|date("d/m/Y") }}
                             </p>
-
                         </div>
-                        <a href="{{ path('page_details_sortie', {'id' : sortie.id, 'pageNumber' : pageNumber}) }}"
-                           class="btn btn-secondary">Plus d'informations</a>
+
+                            <a href="" class="btn disabled" style="background-color:{{ couleurs[sortie.etat.libelle] }}; color:#FFFFFF">{{ sortie.etat.libelle }}</a>
+
+                        <a href="{{ path('page_details_sortie', {'id' : sortie.id, 'pageNumber' : pageNumber}) }}" class="btn btn-secondary">Plus d'informations</a>
                     </div>
                 </div>
             {% endfor %}

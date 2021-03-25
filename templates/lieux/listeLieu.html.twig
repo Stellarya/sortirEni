@@ -27,11 +27,11 @@
                 <tr>
                     <td class="d-none">{{ lieu.id }}/td>
                     <td>{{ lieu.nom }}</td>
-                    <td>{{ rue }}</td>
+                    <td>{% if lieu.rue %} {{ lieu.rue }} {% else %} - {% endif %}</td>
                     <td>{{ lieu.ville.codePostal }}</td>
                     <td>{{ lieu.ville.nom }}</td>
-                    <td class="text-center">{{ latitude }}</td>
-                    <td class="text-center">{{ longitude }}</td>
+                    <td class="text-center">{% if lieu.latitude %} {{ lieu.latitude }} {% else %} - {% endif %}</td>
+                    <td class="text-center">{% if lieu.longitude %} {{ lieu.longitude }}  {% else %} - {% endif %}</td>
                     <td class="d-flex flex-row-reverse">
                         <button type="button" class="btn btn-danger btn_supprimer" data-id="{{ lieu.getId() }}">
                             Supprimer
@@ -50,10 +50,10 @@
         $datatable = $("#datatable_lieux").DataTable();
         $(".btn_supprimer").each(function () {
             $(this).click(function () {
-                let url = "{{ path('sites_delete') }}"
+                let url = "{{ path('lieux_delete') }}"
                 url += "/" + $(this).data("id");
                 let btn = $(this);
-                if (confirm("Etes-vous sûr de vouloir supprimer le site ?")) {
+                if (confirm("Etes-vous sûr de vouloir supprimer le lieu ?")) {
                     $.ajax({
                         url: url,
                         method: "POST",

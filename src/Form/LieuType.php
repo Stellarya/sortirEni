@@ -18,9 +18,7 @@ class LieuType extends AbstractType
     {
         $builder
             ->add('nom', TextType::class)
-            ->add('rue', TextType::class, array('required' => false))
-            ->add('latitude', TextType::class, array('required' => false))
-            ->add('longitude', TextType::class, array('required' => false))
+            ->add('rue', TextType::class, array('required' => true))
             ->add('ajouter', SubmitType::class);
         $this->addVille($builder);
     }
