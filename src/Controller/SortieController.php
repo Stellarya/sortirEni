@@ -137,19 +137,17 @@ class SortieController extends AbstractController
                 $sorties = array_slice($sorties, $firstResult, $maxResults);
             }
 
+            // retire la sortie si elle est réservée à un groupe dont ne fait pas partie l'user connecté
             $onlyGroupe = $data["only_groupe"];
-            if ($onlyGroupe) {
-                $sorties = [];
-                /** @var Participant $participantConnecte */
-                foreach ($participantConnecte->getGroupes() as $groupe) {
-                    $sorties = array_merge($sorties, $sortieRepository->findSortiesByGroupe($groupe->getId()));
-                }
-            } else {
-                // retire la sortie si elle est réservée à un groupe dont ne fait pas partie l'user connecté
-                foreach ($sorties as $k => $sortie) {
-                    /** @var Sortie $sortie */
-                    /** @var Groupe $groupe */
-                    $groupe = $sortie->getGroupe();
+            foreach ($sorties as $k => $sortie) {
+                /** @var Sortie $sortie */
+                /** @var Groupe $groupe */
+                $groupe = $sortie->getGroupe();
+                if ($onlyGroupe) {
+                    if (!($sortie->getGroupe() && $groupe->hasParticipant($participantConnecte))) {
+                        unset($sorties[$k]);
+                    }
+                } else {
                     if ($sortie->getGroupe() && !$groupe->hasParticipant($participantConnecte)) {
                         unset($sorties[$k]);
                     }
