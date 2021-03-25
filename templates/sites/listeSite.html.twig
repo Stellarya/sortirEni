@@ -38,25 +38,28 @@
     </div>
     <script>
         $datatable = $("#datatable_sites").DataTable();
-        $(".btn_supprimer").each(function () {
-            $(this).click(function () {
-                let url = "{{ path('sites_delete') }}"
-                url += "/" + $(this).data("id");
-                let btn = $(this);
-                if (confirm("Etes-vous sûr de vouloir supprimer le site ?")) {
-                    $.ajax({
-                        url: url,
-                        method: "POST",
-                        success: function (result) {
-                            if (result.is_ok) {
-                                $datatable.row(btn.closest("tr")).remove().draw()
-                                $.notify(result.message, {className: "success"});
-                            } else {
-                                $.notify(result.message, {className: "error"});
-                            }
-                        },
-                    });
-                }
+        $datatable.rows().every(function (rowIdx, tableLoop, rowLoop) {
+            var data = this.node();
+            $(data).find('.btn_supprimer').each(function() {
+                $(this).click(function () {
+                    let url = "{{ path('sites_delete') }}"
+                    url += "/" + $(this).data("id");
+                    let btn = $(this);
+                    if (confirm("Etes-vous sûr de vouloir supprimer le site ?")) {
+                        $.ajax({
+                            url: url,
+                            method: "POST",
+                            success: function (result) {
+                                if (result.is_ok) {
+                                    $datatable.row(btn.closest("tr")).remove().draw()
+                                    $.notify(result.message, {className: "success"});
+                                } else {
+                                    $.notify(result.message, {className: "error"});
+                                }
+                            },
+                        });
+                    }
+                })
             })
         })
     </script>
