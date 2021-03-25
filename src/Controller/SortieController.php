@@ -261,7 +261,6 @@ class SortieController extends AbstractController
                 $sortie->setInfosSortie($request->get('infosSortie'));
             }
 
-            //dd($request->get('urlPhoto'));
             $lieu = $lieuForm->getData();
             $sortie->setLieu($lieu);
             $this->forward(
@@ -272,6 +271,7 @@ class SortieController extends AbstractController
                     'em' => $em,
                     'lieuRepository' => $lieuRepository,
                     'lieuFormSortie' => $lieu,
+                    'fromSortie' => true,
                 ]
             );
             //return $this->redirectToRoute('page_sortie');

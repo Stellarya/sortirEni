@@ -3,9 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Lieu;
+use App\Entity\Site;
 use App\Entity\Ville;
 use App\Form\LieuType;
 use App\Repository\LieuRepository;
+use App\Repository\SiteRepository;
+use App\Repository\UserRepository;
 use App\Repository\VilleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -48,7 +51,10 @@ class LieuController extends AbstractController
      * @param EntityManagerInterface $em
      * @param LieuRepository $lieuRepository
      * @param VilleRepository $villeRepository
+     * @param SiteRepository $siteRepository
+     * @param UserRepository $userRepository
      * @param Lieu|null $lieuFormSortie
+     * @param bool $fromSortie
      * @return Response
      */
     public function form(
@@ -57,31 +63,43 @@ class LieuController extends AbstractController
         EntityManagerInterface $em,
         LieuRepository $lieuRepository,
         VilleRepository $villeRepository,
-        Lieu $lieuFormSortie = null
+        SiteRepository $siteRepository,
+        UserRepository $userRepository,
+        Lieu $lieuFormSortie = null,
+        bool $fromSortie = false
     ): Response {
+
         if (-1 == $id) {
             $oLieu = new Lieu();
             $title = 'Créer un lieu';
+            $participantConnecte = $userRepository->findOneBy(
+                ["username" => $this->getUser()->getUsername()]
+            )->getParticipant();
+            $siteID = $participantConnecte->getEstRattacheA()->getId();
+            $site = $siteRepository->find($siteID);
+            $coord = $this->getLatitudeLongitudeDuSite($site);
+            $lieuDejaExistant = false;
         } else {
             $oLieu = $lieuRepository->find($id);
             $title = 'Modifier un lieu';
+            $this->getLatitudeLongitude($oLieu);
+            $coord = array(["latitude" => $oLieu->getLatitude(), "longitude" => $oLieu->getLongitude()]);
+            $lieuDejaExistant = true;
         }
 
         $lieuForm = $this->createForm(LieuType::class, $oLieu);
 
         $lieuForm->handleRequest($request);
-        if (isset($lieuFormSortie) || ($lieuForm->isSubmitted() && $lieuForm->isValid())) {
+        if ($fromSortie || ($lieuForm->isSubmitted() && $lieuForm->isValid())) {
 
-            if (isset($lieuFormSortie)) {
+            if ($fromSortie) {
                 $oLieu = $lieuFormSortie;
             }
 
-            $nom = $oLieu->getNom();
-            $rue = $oLieu->getRue();
+            $latitude = $oLieu->getLatitude();
+            $longitude = $oLieu->getLongitude();
 
-            if (isset($nom) && isset($rue)) {
-                $this->getLatitudeLongitude($oLieu);
-            } else {
+            if (isset($latitude) && isset($longitude)) {
                 $ville = new Ville();
                 $this->getAdresseParLatitudeLongitude($oLieu, $ville);
                 $villeExiste = $villeRepository->findOneBy(["nom" => $ville->getNom()]);
@@ -91,8 +109,16 @@ class LieuController extends AbstractController
                 } else {
                     $oLieu->setVille($villeExiste);
                 }
+            } else {
+                $this->getLatitudeLongitude($oLieu);
             }
-            $em->persist($oLieu);
+
+            if ($fromSortie) {
+                $lieuFormSortie = $oLieu;
+                $em->persist($lieuFormSortie);
+            } else {
+                $em->persist($oLieu);
+            }
             $em->flush();
             if (-1 == $id) {
                 $this->addFlash("success", "Lieu créé avec succès !");
@@ -108,6 +134,8 @@ class LieuController extends AbstractController
             [
                 "lieuForm" => $lieuForm->createView(),
                 "title" => $title,
+                "coord" => $coord,
+                "lieuDejaExistant" => $lieuDejaExistant,
             ]
         );
     }
@@ -159,7 +187,7 @@ class LieuController extends AbstractController
     {
         $url = "http://api.positionstack.com/v1/forward?";
         $params = $oLieu->getRue()." ".$oLieu->getVille()->getCodePostal()." ".$oLieu->getVille()->getNom();
-        $json = $this->getDataFromApi($params, $url, $oLieu);
+        $json = $this->getDataFromApi($params, $url);
         $oLieu->setLatitude($json["data"][0]["latitude"]);
         $oLieu->setLongitude($json["data"][0]["longitude"]);
     }
@@ -172,7 +200,7 @@ class LieuController extends AbstractController
     {
         $url = "http://api.positionstack.com/v1/reverse?";
         $params = $oLieu->getLatitude().",".$oLieu->getLongitude();
-        $json = $this->getDataFromApi($params, $url, $oLieu);
+        $json = $this->getDataFromApi($params, $url);
 
         $oLieu->setRue($json["data"][0]["name"]);
         $ville->setNom($json["data"][0]["locality"]);
@@ -188,11 +216,22 @@ class LieuController extends AbstractController
     }
 
     /**
+     * @param Site|null $site
+     */
+    public function getLatitudeLongitudeDuSite(?Site $site): array
+    {
+        $url = "http://api.positionstack.com/v1/forward?";
+        $params = $site->getNom();
+        $json = $this->getDataFromApi($params, $url);
+
+        return array(["latitude" => $json["data"][0]["latitude"], "longitude" => $json["data"][0]["longitude"]]);
+    }
+
+    /**
      * @param string $params
      * @param string $url
-     * @param Lieu|null $oLieu
      */
-    public function getDataFromApi(string $params, string $url, ?Lieu $oLieu): array
+    public function getDataFromApi(string $params, string $url): array
     {
         $url = str_replace(' ', '%20', $url);
         $options = array(

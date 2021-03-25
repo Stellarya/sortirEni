@@ -74,7 +74,6 @@
             });
         }
 
-
         /**
          * Boilerplate map initialization code starts below:
          */
@@ -89,10 +88,11 @@
         //Step 2: initialize a map
         var map = new H.Map(document.getElementById('map'),
             defaultLayers.vector.normal.map, {
-                center: {lat: 48.099421, lng: -1.659138},
+                center: {lat: {{ coord[0]["latitude"] }}, lng: {{ coord[0]["longitude"] }} },
                 zoom: 13,
-                pixelRatio: window.devicePixelRatio || 1
+                pixelRatio: window.devicePixelRatio || 1,
             });
+
         // add a resize listener to make sure that the map occupies the whole container
         window.addEventListener('resize', () => map.getViewPort().resize());
 
@@ -114,7 +114,12 @@
             entry.textContent = str;
             logContainer.insertBefore(entry, logContainer.firstChild);
         }
-
+        {% if lieuDejaExistant %}
+            let latitude = {{ coord[0]["latitude"] }};
+            let longitude = {{ coord[0]["longitude"] }};
+            map.addObject(new H.map.Marker({lat: latitude, lng: longitude }));
+            console.log(latitude, longitude);
+        {% endif %}
 
         setUpClickListener(map);
     </script>
