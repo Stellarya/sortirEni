@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+
+{% block body %}
+    <div class="alert alert-light sortir-box">
+        <table id="datatable_groupe" class="display">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Groupe</th>
+                <th>Owner</th>
+                <th>Détails</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for groupe in listeGroupes %}
+                <tr>
+                    <td>{{ groupe.getId() }}</td>
+                    <td>{{ groupe.getLibelle() }}</td>
+                    <td>{{ groupe.getOwner() }}</td>
+                    <td>
+                        <a href="{{ path("groupe_view", {"id": groupe.getId()}) }}">
+                            <button type="button" class="btn btn-primary btn_modifier">Voir</button>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{{ path("groupe_add") }}">
+            <button type="button" class="btn btn-primary btn_modifier">Créer un nouveau groupe</button>
+        </a>
+
+
+    </div>
+
+
+    <script>
+        $datatable = $("#datatable_groupe").DataTable();
+    </script>
+{% endblock %}
+
+

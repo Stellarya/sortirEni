@@ -1,0 +1,26 @@
+<table id="datatable_participants" class="display">
+    <thead>
+    <tr>
+        <th>Prénom</th>
+        <th>Nom</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for participant in groupe.getParticipants() %}
+        <tr>
+            <td>{{ participant.getPrenom() }}</td>
+            <td>{{ participant.getNom() }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if groupe.getOwner().getId() == app.user.getParticipant().getId() %}
+    <a href="{{ path("groupe_edit", {"id": groupe.getId()}) }}">
+        <button type="button" class="btn btn-primary btn_modifier">Modifier le groupe</button>
+    </a>
+{% endif %}
+
+<script>
+    $datatable = $("#datatable_participants").DataTable();
+</script>

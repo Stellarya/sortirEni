@@ -10,6 +10,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
+use function Doctrine\ORM\QueryBuilder;
 
 /**
  * @method Sortie|null find($id, $lockMode = null, $lockVersion = null)
@@ -254,6 +255,13 @@ class SortieRepository extends ServiceEntityRepository
             ->where($qb->expr()->eq('e.id', '2'))
             ->addCriteria($this->criteria)
              ;
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findSortiesByGroupe(int $groupe_id) {
+        $qb = $this->createQueryBuilder("s");
+        $qb->join("s.groupe", "g")
+            ->where($qb->expr()->eq("g.id", $groupe_id));
         return $qb->getQuery()->getResult();
     }
 

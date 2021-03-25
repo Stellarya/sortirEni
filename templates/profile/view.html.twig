@@ -30,24 +30,26 @@
             </div>
             <div class="col-sm-4">
                 <p class="m-b-10 f-w-600">Nombre d'inscriptions</p>
-                <h6 class="text-muted f-w-400">0</h6>
+                <h6 class="text-muted f-w-400">{{ nbSorties }}</h6>
             </div>
         {% endblock %}
         {% block actions %}
             {% if (app.user.getId() is same as(user.getId())) %}
-                <div class="col-sm-4">
+                <div class="ml-3">
                     <a href="{{ path("profile_edit") }}"><button type="button" class="btn btn-light">Editer mon profil</button></a>
                 </div>
             {% elseif (app.user.isAdmin()) %}
-                <div class="col-sm-4">
+                <div class="ml-3">
                     <a href="{{ path("admin_users", {"id": user.getId()}) }}"><button type="button" class="btn btn-danger">Editer ce profil</button></a>
-
                 </div>
             {% else %}
-                <div class="col-sm-4">
+                <div class="ml-3">
                     <h6 class="text-muted f-w-400">Aucune action disponible.</h6>
                 </div>
             {% endif %}
+            <div class="ml-3">
+                <a href="{{ path("groupe_list") }}"><button type="button" class="btn btn-primary">Mes groupes</button></a>
+            </div>
         {% endblock %}
     {% endembed %}
 {% endblock %}

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Groupe;
 use App\Entity\Participant;
 use App\Entity\Sortie;
 use App\Entity\User;
@@ -222,6 +223,12 @@ class SortieController extends AbstractController
                 return $this->redirectToRoute('page_sortie');
             }
             $title = 'Modifier une Sortie';
+        }
+
+        if ($groupe_id = $request->query->get("groupe") && !$sortie->getGroupe()) {
+            $groupeRepo = $em->getRepository(Groupe::class);
+            $groupe = $groupeRepo->find($groupe_id);
+            $sortie->setGroupe($groupe);
         }
 
         $sortieForm = $this->createForm(SortieType::class, $sortie);
