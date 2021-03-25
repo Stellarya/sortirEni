@@ -104,6 +104,12 @@ class Sortie
     private $participants;
 
     /**
+     * @ORM\JoinColumn(nullable=true)
+     * @ORM\OneToOne(targetEntity=Groupe::class)
+     */
+    private $groupe;
+
+    /**
      * @ORM\ManyToOne(targetEntity=Participant::class)
      * @ORM\JoinColumn(nullable=false)
      */
@@ -289,6 +295,26 @@ class Sortie
         return $this;
     }
 
+
+    /**
+     * @return mixed
+     */
+    public function getGroupe()
+    {
+        return $this->groupe;
+    }
+
+    /**
+     * @param mixed $groupe
+     */
+    public function setGroupe($groupe): void
+    {
+        $this->groupe = $groupe;
+    }
+
+
+
+
     public function getMessageAnnulation() : ?string
     {
         return $this->messageAnnulation;
@@ -298,4 +324,5 @@ class Sortie
     {
         $this->messageAnnulation = $messageAnnulation;
     }
+
 }

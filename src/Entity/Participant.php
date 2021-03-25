@@ -50,9 +50,15 @@ class Participant
      */
     private $estInscrit;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Groupe::class, mappedBy="participants")
+     */
+    private $groupes;
+
     public function __construct()
     {
         $this->estInscrit = new ArrayCollection();
+        $this->groupes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -145,8 +151,46 @@ class Participant
         return $this;
     }
 
+    public function addGroupe(Groupe $groupe): self
+    {
+        if (!$this->groupes->contains($groupe)) {
+            $this->groupes[] = $groupe;
+        }
+
+        return $this;
+    }
+
+    public function removeGroupe(Groupe $groupe): self
+    {
+        $this->groupes->removeElement($groupe);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getGroupes(): Collection
+    {
+        return $this->groupes;
+    }
+
+    /**
+     * @param Collection $groupes
+     */
+    public function setGroupes(Collection $groupes): void
+    {
+        $this->groupes = $groupes;
+    }
+
+
+
     public function getIdentite(): string {
         return "{$this->getPrenom()} {$this->getNom()}";
     }
 
+    public function __toString(): string
+    {
+        return $this->getIdentite();
+    }
 }

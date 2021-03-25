@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Groupe;
 use App\Entity\Participant;
 use App\Entity\Sortie;
 use App\Entity\User;
@@ -138,12 +139,25 @@ class SortieController extends AbstractController
                 $firstResult = ($pageNumber - 1) * $maxResults;
                 $sorties = array_slice($sorties, $firstResult, $maxResults);
             }
-            list($nbPage, $pagesAafficher) = $this->getInfosPourPagination(
-                $sortieRepository,
-                $maxResults,
-                $pageNumber,
-                $session
-            );
+
+            // retire la sortie si elle est réservée à un groupe dont ne fait pas partie l'user connecté
+            $onlyGroupe = $data["only_groupe"];
+            foreach ($sorties as $k => $sortie) {
+                /** @var Sortie $sortie */
+                /** @var Groupe $groupe */
+                $groupe = $sortie->getGroupe();
+                if ($onlyGroupe) {
+                    if (!($sortie->getGroupe() && $groupe->hasParticipant($participantConnecte))) {
+                        unset($sorties[$k]);
+                    }
+                } else {
+                    if ($sortie->getGroupe() && !$groupe->hasParticipant($participantConnecte)) {
+                        unset($sorties[$k]);
+                    }
+                }
+            }
+
+            list($nbPage, $pagesAafficher) = $this->getInfosPourPagination($sortieRepository, $maxResults, $pageNumber, $session);
         }
 
         $sorties = $this->triSortiesParDate($sorties);
@@ -233,6 +247,12 @@ class SortieController extends AbstractController
                 return $this->redirectToRoute('page_sortie');
             }
             $title = 'Modifier une Sortie';
+        }
+
+        if (($groupe_id = $request->query->get("groupe")) && !$sortie->getGroupe()) {
+            $groupeRepo = $em->getRepository(Groupe::class);
+            $groupe = $groupeRepo->find($groupe_id);
+            $sortie->setGroupe($groupe);
         }
 
 
