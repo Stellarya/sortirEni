@@ -50,9 +50,11 @@
 
                         <div class="card-body bg-light">
                             <h5 class="card-title">{{ sortie.nom }}</h5>
-                            <p class="card-text">{{ sortie.infosSortie|striptags|slice(0,50) }}
+                            <p class="card-text">
                                 {% if sortie.infosSortie|length > 50 %}
-                                    [...]
+                                    {{ sortie.infosSortie|striptags|slice(0,50) }}[...]
+                                {% else %}
+                                    {{ sortie.infosSortie }}
                                 {% endif %}
                                 <br>
                                 Inscrits : {{ sortie.participants|length }}/{{ sortie.nbInscriptionMax }}
@@ -63,7 +65,7 @@
 
                             <a href="" class="btn disabled" style="background-color:{{ couleurs[sortie.etat.libelle] }}; color:#FFFFFF">{{ sortie.etat.libelle }}</a>
 
-                        <a href="{{ path('page_details_sortie', {'id' : sortie.id, 'pageNumber' : pageNumber}) }}" class="btn btn-secondary">Plus d'informations</a>
+                        <a href="{{ path('page_details_sortie', {'id' : sortie.id, 'pageNumber' : pageNumber}) }}" class="btn btn-secondary">Plus d'informations <i class="fas fa-map-marker-alt"></i></a>
                     </div>
                 </div>
             {% endfor %}

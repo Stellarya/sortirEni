@@ -1,31 +1,29 @@
 {% extends('base.html.twig') %}
 {% block body %}
     <div class="container">
-        {{ form_start(lieuForm, {'attr': {'class': 'form-inline'}}) }}
-        {{ form_errors(lieuForm) }}
-        <div class="col-12">
-            <div class="form-group mb-3 row">
-                <label class="col-2 col-form-label" for="nom_lieu">Nom
-                    <span class="required">*</span>
-                </label>
-                <div class="col-3">
-                    {{ form_widget(lieuForm.nom, {'attr': {'class': 'form-control'}}) }}
-                </div>
-                <div class="col-1"></div>
-                <label class="col-2 col-form-label" for="rue_lieu">Rue
-                    <span class="required">*</span>
-                </label>
-                <div class="col-3">
-                    {{ form_widget(lieuForm.rue, {'attr': {'class': 'form-control'}}) }}
-                </div>
+    {{ form_start(lieuForm, {'attr': {'class': 'form-inline'}}) }}
+    {{ form_errors(lieuForm) }}
+    <div class="col-12">
+        <div class="form-group mb-3 row">
+            <label class="col-2 col-form-label" for="nom_lieu">Nom
+                <span class="required">*</span>
+            </label>
+            <div class="col-3">
+                {{ form_widget(lieuForm.nom, {'attr': {'class': 'form-control'}}) }}
             </div>
-            <div class="form-group mb-3 row">
-                <label class="col-2 col-form-label" for="ville_lieu">Ville
-                    <span class="required">*</span>
-                </label>
-                <div class="col-3">
-                    {{ form_widget(lieuForm.ville, {'attr': {'class': 'form-control'}}) }}
-                </div>
+            <div class="col-1"></div>
+            <label class="col-2 col-form-label" for="rue_lieu">Rue
+            </label>
+            <div class="col-3">
+                {{ form_widget(lieuForm.rue, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+        <div class="form-group mb-3 row">
+            <label class="col-2 col-form-label" for="ville_lieu">Ville
+            </label>
+            <div class="col-3">
+                {{ form_widget(lieuForm.ville, {'attr': {'class': 'form-control'}}) }}
+            </div>
         </div>
     </div>
     <div class="d-flex justify-content-center w-100 d-none d-sm-flex mt-4">
@@ -33,4 +31,96 @@
         {{ form_end(lieuForm) }}
     </div>
 
+
+    <!-- HERE maps -->
+    <link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css"/>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
+
+    <div class="col-12 mb-3" style="height:500px; padding:0">
+        <div id="map"></div>
+    </div>
+
+    <script>
+        /**
+         * An event listener is added to listen to tap events on the map.
+         * Clicking on the map displays an alert box containing the latitude and longitude
+         * of the location pressed.
+         * @param  {H.Map} map      A HERE Map instance within the application
+         */
+        function setUpClickListener(map) {
+            // Attach an event listener to map display
+            // obtain the coordinates and display in an alert box.
+            map.addEventListener('tap', function (evt) {
+                let coord = map.screenToGeo(evt.currentPointer.viewportX,
+                    evt.currentPointer.viewportY);
+                logEvent('Clicked at ' + Math.abs(coord.lat.toFixed(4)) +
+                    ((coord.lat > 0) ? 'N' : 'S') +
+                    ' ' + Math.abs(coord.lng.toFixed(4)) +
+                    ((coord.lng > 0) ? 'E' : 'W'));
+                let lat = document.getElementById('lieu_latitude').value;
+                let lng = document.getElementById('lieu_longitude').value;
+                if(lat !== "" && lng !== "")
+                {
+                    map.removeObjects(map.getObjects());
+                }
+
+                let marker = new H.map.Marker({lat: coord.lat, lng: coord.lng})
+                map.addObject(marker);
+                document.getElementById('lieu_latitude').value = coord.lat;
+                document.getElementById('lieu_longitude').value = coord.lng;
+            });
+        }
+
+        /**
+         * Boilerplate map initialization code starts below:
+         */
+
+            //Step 1: initialize communication with the platform
+            // In your own code, replace variable window.apikey with your own apikey
+        var platform = new H.service.Platform({
+                apikey: '9syRb4qXAKI_6_RSbNlfK-Vfl2_kC-DwLSHST9qFq3U'
+            });
+        var defaultLayers = platform.createDefaultLayers();
+
+        //Step 2: initialize a map
+        var map = new H.Map(document.getElementById('map'),
+            defaultLayers.vector.normal.map, {
+                center: {lat: {{ coord[0]["latitude"] }}, lng: {{ coord[0]["longitude"] }} },
+                zoom: 13,
+                pixelRatio: window.devicePixelRatio || 1,
+            });
+
+        // add a resize listener to make sure that the map occupies the whole container
+        window.addEventListener('resize', () => map.getViewPort().resize());
+
+        //Step 3: make the map interactive
+        // MapEvents enables the event system
+        // Behavior implements default interactions for pan/zoom (also on mobile touch environments)
+        var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(map));
+
+        // Step 4: create custom logging facilities
+        var logContainer = document.createElement('ul');
+        logContainer.className = 'log';
+        logContainer.innerHTML = '<li class="log-entry">Try clicking on the map</li>';
+        map.getElement().appendChild(logContainer);
+
+        // Helper for logging events
+        function logEvent(str) {
+            var entry = document.createElement('li');
+            entry.className = 'log-entry';
+            entry.textContent = str;
+            logContainer.insertBefore(entry, logContainer.firstChild);
+        }
+        {% if lieuDejaExistant %}
+            let latitude = {{ coord[0]["latitude"] }};
+            let longitude = {{ coord[0]["longitude"] }};
+            map.addObject(new H.map.Marker({lat: latitude, lng: longitude }));
+            console.log(latitude, longitude);
+        {% endif %}
+
+        setUpClickListener(map);
+    </script>
 {% endblock %}
