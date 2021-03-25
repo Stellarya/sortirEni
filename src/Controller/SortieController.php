@@ -137,7 +137,7 @@ class SortieController extends AbstractController
                 $sorties = array_slice($sorties, $firstResult, $maxResults);
             }
 
-            $onlyGroupe = isset($data["only_groupe"]);
+            $onlyGroupe = $data["only_groupe"];
             if ($onlyGroupe) {
                 $sorties = [];
                 /** @var Participant $participantConnecte */
