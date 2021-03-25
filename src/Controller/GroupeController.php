@@ -4,10 +4,13 @@ namespace App\Controller;
 
 use App\Entity\Groupe;
 use App\Entity\Participant;
+use App\Entity\Sortie;
 use App\Form\GroupeType;
 use App\Repository\GroupeRepository;
 use App\Repository\ParticipantRepository;
+use App\Repository\SortieRepository;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,23 +41,29 @@ class GroupeController extends AbstractController
     /**
      * @Route("/groupe/{id}", name="groupe_view")
      * @param int $id
+     * @param EntityManagerInterface $em
      * @return Response
      */
-    public function groupe_view(int $id): Response {
-        $em = $this->getDoctrine()->getManager();
+    public function groupe_view(int $id, EntityManagerInterface $em): Response {
         /** @var GroupeRepository $groupeRepo */
         $groupeRepo = $em->getRepository(Groupe::class);
         /** @var Groupe $groupe */
         $groupe = $groupeRepo->find($id);
 
         if (!$groupe->getParticipants()->contains($this->getUser())) {
-            // throw
+            // throw "vous n'est pas membre"
         }
+
+        /** @var SortieRepository $sortieRepo */
+        $sortieRepo = $em->getRepository(Sortie::class);
+        $listeSorties = $sortieRepo->findSortiesByGroupe($id);
+
 
         return $this->render('groupe/view.html.twig', [
             'controller_name'       => 'GroupeController',
             "groupe"                => $groupe,
             "title"                 => $groupe->getLibelle(),
+            "sorties"         => $listeSorties,
         ]);
 
     }

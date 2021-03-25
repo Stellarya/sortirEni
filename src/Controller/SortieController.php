@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Groupe;
 use App\Entity\Sortie;
 use App\Form\SortieFiltreType;
 use App\Form\SortieType;
@@ -188,6 +189,12 @@ class SortieController extends AbstractController
         } else {
             $sortie = $sortieRepository->find($id);
             $title = 'Modifier une Sortie';
+        }
+
+        if ($groupe_id = $request->query->get("groupe") && !$sortie->getGroupe()) {
+            $groupeRepo = $em->getRepository(Groupe::class);
+            $groupe = $groupeRepo->find($groupe_id);
+            $sortie->setGroupe($groupe);
         }
 
         $sortieForm = $this->createForm(SortieType::class, $sortie);
