@@ -136,6 +136,26 @@ class SortieController extends AbstractController
                 $firstResult = ($pageNumber - 1) * $maxResults;
                 $sorties = array_slice($sorties, $firstResult, $maxResults);
             }
+
+            $onlyGroupe = isset($data["only_groupe"]);
+            if ($onlyGroupe) {
+                $sorties = [];
+                /** @var Participant $participantConnecte */
+                foreach ($participantConnecte->getGroupes() as $groupe) {
+                    $sorties = array_merge($sorties, $sortieRepository->findSortiesByGroupe($groupe->getId()));
+                }
+            } else {
+                // retire la sortie si elle est réservée à un groupe dont ne fait pas partie l'user connecté
+                foreach ($sorties as $k => $sortie) {
+                    /** @var Sortie $sortie */
+                    /** @var Groupe $groupe */
+                    $groupe = $sortie->getGroupe();
+                    if ($sortie->getGroupe() && !$groupe->hasParticipant($participantConnecte)) {
+                        unset($sorties[$k]);
+                    }
+                }
+            }
+
             list($nbPage, $pagesAafficher) = $this->getInfosPourPagination($sortieRepository, $maxResults, $pageNumber, $session);
         }
 
@@ -225,7 +245,7 @@ class SortieController extends AbstractController
             $title = 'Modifier une Sortie';
         }
 
-        if ($groupe_id = $request->query->get("groupe") && !$sortie->getGroupe()) {
+        if (($groupe_id = $request->query->get("groupe")) && !$sortie->getGroupe()) {
             $groupeRepo = $em->getRepository(Groupe::class);
             $groupe = $groupeRepo->find($groupe_id);
             $sortie->setGroupe($groupe);

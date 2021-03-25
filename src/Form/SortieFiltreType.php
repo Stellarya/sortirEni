@@ -67,6 +67,12 @@ class SortieFiltreType extends AbstractType
                     'label' => 'Sorties passées',
                     'required' => false
                 ])
+            ->add('only_groupe',
+                CheckboxType::class,
+                [
+                    'label' => 'Seulement celles de mes groupes',
+                    'required' => false
+                ])
             ->add(
                 'rechercher',
                 SubmitType::class,
