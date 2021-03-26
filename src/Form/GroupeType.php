@@ -25,7 +25,7 @@ class GroupeType extends AbstractType
                 "required" => false,
                 'multiple' => true,
                 "query_builder" => function(EntityRepository $er) {
-                    return $er->createQueryBuilder("p")->orderBy("p.nom", "ASC");
+                    return $er->createQueryBuilder("p")->orderBy("p.prenom, p.nom", "ASC");
                 },
             ])
             ->add(
