@@ -2,15 +2,6 @@
     {% for sortie in sorties %}
         <div class="col-12 col-lg-6 col-xl-3 d-flex align-items-stretch">
             <div class="card mb-3">
-                <div class="height100">
-                    {% if sortie.id is divisible by (2) %}
-                        <img class="card-img-top image_details" src="{{ asset("images/thabor.jpg") }}"
-                             alt="Card image cap">
-                    {% else %}
-                        <img class="card-img-top image_details" src="{{ asset("images/thabor2.jpg") }}"
-                             alt="Card image cap">
-                    {% endif %}
-                </div>
 
                 <div class="card-body">
                     <h5 class="card-title">{{ sortie.nom }}</h5>
