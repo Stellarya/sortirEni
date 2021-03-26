@@ -49,7 +49,12 @@
                         </div>
 
                         <div class="card-body bg-light">
-                            <h5 class="card-title">{{ sortie.nom }}</h5>
+                            <h5 class="card-title">
+                                {{ sortie.nom }}
+                                {% if sortie.getGroupe() %}
+                                    ({{ sortie.getGroupe().getLibelle() }})
+                                {% endif %}
+                            </h5>
                             <p class="card-text">
                                 {% if sortie.infosSortie|length > 50 %}
                                     {{ sortie.infosSortie|striptags|slice(0,50) }}[...]
