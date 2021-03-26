@@ -128,7 +128,7 @@ class LieuController extends AbstractController
                 $this->addFlash("success", "Lieu modifié avec succès !");
             }
 
-            return $this->redirectToRoute('lieux_list');
+            return $this->redirectToRoute('page_sortie');
         }
 
         return $this->render(
