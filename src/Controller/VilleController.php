@@ -24,6 +24,8 @@ class VilleController extends AbstractController
      */
     public function list(VilleRepository $villeRepository)
     {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+
         $toVille = $villeRepository->findAll();
 
         return $this->render('villes/listeville.html.twig', [

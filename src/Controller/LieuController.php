@@ -33,6 +33,8 @@ class LieuController extends AbstractController
      */
     public function list(LieuRepository $lieuRepository)
     {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+
         $toLieu = $lieuRepository->findAll();
 
         return $this->render(
