@@ -31,7 +31,6 @@
         {{ form_end(lieuForm) }}
     </div>
 
-
     <!-- HERE maps -->
     <link rel="stylesheet" type="text/css" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css"/>
     <script type="text/javascript" src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
@@ -42,17 +41,17 @@
     <div class="col-12 mb-3" style="height:500px; padding:0">
         <div id="map"></div>
     </div>
+    {% endblock %}
 
+    {% block javascripts %}
     <script>
         /**
          * An event listener is added to listen to tap events on the map.
-         * Clicking on the map displays an alert box containing the latitude and longitude
-         * of the location pressed.
+         * Clicking on the map displays a marker.
          * @param  {H.Map} map      A HERE Map instance within the application
          */
         function setUpClickListener(map) {
-            // Attach an event listener to map display
-            // obtain the coordinates and display in an alert box.
+
             map.addEventListener('tap', function (evt) {
                 let coord = map.screenToGeo(evt.currentPointer.viewportX,
                     evt.currentPointer.viewportY);

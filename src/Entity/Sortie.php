@@ -105,7 +105,7 @@ class Sortie
 
     /**
      * @ORM\JoinColumn(nullable=true)
-     * @ORM\OneToOne(targetEntity=Groupe::class)
+     * @ORM\ManyToOne(targetEntity=Groupe::class)
      */
     private $groupe;
 

@@ -60,8 +60,8 @@ class ResetPasswordController extends AbstractController
 
     /**
      * Confirmation page after a user has requested a password reset.
+     * @Route("/reset-password/check-email", name="app_check_email")
      */
-    #[Route('/reset-password/check-email', name: 'app_check_email')]
     public function checkEmail(): Response
     {
 
@@ -82,8 +82,8 @@ class ResetPasswordController extends AbstractController
 
     /**
      * Validates and process the reset URL that the user clicked in their email.
+     * @Route("/reset-password/reset/{token}", name="app_reset_password")
      */
-    #[Route('/reset-password/reset/{token}', name: 'app_reset_password')]
     public function reset(Request $request, UserPasswordEncoderInterface $passwordEncoder, string $token = null): Response
     {
         if ($token) {
@@ -158,14 +158,14 @@ class ResetPasswordController extends AbstractController
 
 
 
-            // If you want to tell the user why a reset email was not sent, uncomment
-            // the lines below and change the redirect to 'app_forgot_password_request'.
-            // Caution: This may reveal if a user is registered or not.
-            //
-            // $this->addFlash('reset_password_error', sprintf(
-            //     'There was a problem handling your password reset request - %s',
-            //     $e->getReason()
-            // ));
+             /*If you want to tell the user why a reset email was not sent, uncomment
+             the lines below and change the redirect to 'app_forgot_password_request'.
+             Caution: This may reveal if a user is registered or not.*/
+
+             $this->addFlash('reset_password_error', sprintf(
+                 'There was a problem handling your password reset request - %s',
+                 $e->getReason()
+             ));
 
         }
 

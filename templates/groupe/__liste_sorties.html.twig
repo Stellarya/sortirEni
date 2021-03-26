@@ -1,8 +1,10 @@
 {% if sorties|length > 0 %}
+   <div class="container-fluid">
+    <div class="row mt-3">
     {% for sortie in sorties %}
-        <div class="col-12 col-lg-6 col-xl-3 d-flex align-items-stretch">
-            <div class="card mb-3">
 
+        <div class="col-12 col-lg-6 col-xl-3 d-flex align-items-stretch mr-0">
+            <div class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-title">{{ sortie.nom }}</h5>
                     <p class="card-text">{{ sortie.infosSortie|striptags|slice(0,50) }}
@@ -21,6 +23,7 @@
             </div>
         </div>
     {% endfor %}
+    </div></div>
 {% else %}
     <h5>Aucune sortie.</h5>
 {% endif %}
