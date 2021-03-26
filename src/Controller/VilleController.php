@@ -66,7 +66,7 @@ class VilleController extends AbstractController
                 $this->addFlash("success", "Ville modifiée avec succès !");
             }
 
-            return $this->redirectToRoute('villes_list');
+            return $this->redirectToRoute('page_sortie');
         }
 
         return $this->render('villes/formulaire.html.twig', [
