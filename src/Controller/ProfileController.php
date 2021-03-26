@@ -30,7 +30,7 @@ class ProfileController extends AbstractController
 
         if ($id > 0) {
             $user = $entityManager->getRepository(User::class)->find($id);
-            $title = "Profile de {$user->getParticipant()->getPrenom()}";
+            $title = "Profil de {$user->getParticipant()->getPrenom()}";
         } else {
             $user = $this->getUser();
             $title = "Mon profil";
